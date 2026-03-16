@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file=.env index.ts",
-    "start": "tsx --env-file=.env index.ts",
+    "start": "tsx index.ts",
     "dev:mcp": "tsx watch mcp/contract-analyzer.ts",
     "start:mcp": "tsx mcp/contract-analyzer.ts"
   },
