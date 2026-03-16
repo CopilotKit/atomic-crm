@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { cors } from "hono/cors";
+import type { MiddlewareHandler } from "hono";
 import {
   CopilotRuntime,
   createCopilotEndpointSingleRoute,
@@ -63,16 +63,29 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
   : ["http://localhost:5173"];
 
-app.use(
-  "/*",
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization", "Accept"],
-    exposeHeaders: ["Content-Type"],
-  }),
-);
+console.log("CORS allowed origins:", allowedOrigins);
+
+const corsMiddleware: MiddlewareHandler = async (c, next) => {
+  const origin = c.req.header("Origin");
+  if (origin && allowedOrigins.includes(origin)) {
+    c.header("Access-Control-Allow-Origin", origin);
+    c.header("Access-Control-Allow-Credentials", "true");
+    c.header(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+    );
+    c.header(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, Accept",
+    );
+  }
+  if (c.req.method === "OPTIONS") {
+    return c.body(null, 204);
+  }
+  await next();
+};
+
+app.use("/*", corsMiddleware);
 
 // Mount CopilotKit endpoint (single-route: client POSTs everything to one URL)
 const copilotApp = createCopilotEndpointSingleRoute({
