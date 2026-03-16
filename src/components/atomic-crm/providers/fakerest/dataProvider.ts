@@ -29,7 +29,9 @@ import {
   authProvider as defaultAuthProvider,
   USER_STORAGE_KEY,
 } from "./authProvider";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import generateData from "./dataGenerator";
+import { generateFromCsv } from "./dataGenerator/generateFromCsv";
 import type { Db } from "./dataGenerator/types";
 import { withSupabaseFilterAdapter } from "./internal/supabaseAdapter";
 
@@ -139,7 +141,7 @@ const preserveAttachmentMimeType = <
 });
 
 export const createDataProvider = ({
-  db = generateData(),
+  db = generateFromCsv(),
   latency = 300,
   authProvider,
 }: CreateFakeRestDataProviderOptions = {}): CrmDataProvider => {

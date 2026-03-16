@@ -270,6 +270,10 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/providers/fakerest/dataGenerator/generateFromCsv.ts",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/providers/fakerest/dataGenerator/finalize.ts",
           "type": "registry:component"
         },
@@ -619,6 +623,78 @@
         },
         {
           "path": "src/components/atomic-crm/dashboard/Dashboard.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/useContactEnrichment.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/useCompanyEnrichment.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/CopilotProvider.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/tools/useUpdateRenewalForecast.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/tools/useUpdateContactStatus.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/tools/useSearchContacts.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/tools/useGetTopLeads.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/tools/useGetContactsByCompany.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/tools/useDraftEmail.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/tools/useCreateTask.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/hooks/useCopilotSetup.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/RiskIndicators.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/NextActions.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/MissingSignals.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/LeadPriorityList.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/ForecastAdjustment.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/ContractRiskReport.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/AccountSummary.tsx",
           "type": "registry:component"
         },
         {

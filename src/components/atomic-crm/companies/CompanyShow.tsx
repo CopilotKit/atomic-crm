@@ -3,6 +3,7 @@ import { SortButton } from "@/components/admin/sort-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CopilotChat } from "@copilotkit/react-ui";
 import { formatDistance } from "date-fns";
 import { UserPlus } from "lucide-react";
 import {
@@ -24,6 +25,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ActivityLog } from "../activity/ActivityLog";
 import { Avatar } from "../contacts/Avatar";
 import { TagsList } from "../contacts/TagsList";
+import { useCopilotSetup } from "../copilot/hooks/useCopilotSetup";
+import { useCompanyEnrichment } from "../copilot/useCompanyEnrichment";
 import { findDealLabel } from "../deals/deal";
 import { MobileContent } from "../layout/MobileContent";
 import MobileHeader from "../layout/MobileHeader";
@@ -91,6 +94,24 @@ const CompanyShowContent = () => {
   const tabMatch = useMatch("/companies/:id/show/:tab");
   const currentTab = tabMatch?.params?.tab || "activity";
 
+  // Enrichment and copilot setup — must be BEFORE any early return
+  const { data: enriched } = useCompanyEnrichment(record?.name);
+
+  useCopilotSetup({
+    context: {
+      description:
+        "Current company record being viewed, with enriched contact data",
+      value:
+        record && enriched
+          ? {
+              ...record,
+              enrichedContacts: enriched.stats,
+              contactCount: enriched.stats.total,
+            }
+          : (record ?? null),
+    },
+  });
+
   const handleTabChange = (value: string) => {
     if (value === currentTab) return;
     if (value === "activity") {
@@ -103,79 +124,84 @@ const CompanyShowContent = () => {
   if (isPending || !record) return null;
 
   return (
-    <div className="mt-2 flex pb-2 gap-8">
-      <div className="flex-1">
-        <Card>
-          <CardContent>
-            <div className="flex mb-3">
-              <CompanyAvatar />
-              <h5 className="text-xl ml-2 flex-1">{record.name}</h5>
-            </div>
-            <Tabs defaultValue={currentTab} onValueChange={handleTabChange}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="activity">Activity</TabsTrigger>
-                <TabsTrigger value="contacts">
-                  {record.nb_contacts
-                    ? record.nb_contacts === 1
-                      ? "1 Contact"
-                      : `${record.nb_contacts} Contacts`
-                    : "No Contacts"}
-                </TabsTrigger>
-                {record.nb_deals ? (
-                  <TabsTrigger value="deals">
-                    {record.nb_deals === 1
-                      ? "1 deal"
-                      : `${record.nb_deals} deals`}
+    <>
+      <div className="mt-2 flex pb-2 gap-8">
+        <div className="flex-1">
+          <Card>
+            <CardContent>
+              <div className="flex mb-3">
+                <CompanyAvatar />
+                <h5 className="text-xl ml-2 flex-1">{record.name}</h5>
+              </div>
+              <Tabs defaultValue={currentTab} onValueChange={handleTabChange}>
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="activity">Activity</TabsTrigger>
+                  <TabsTrigger value="contacts">
+                    {record.nb_contacts
+                      ? record.nb_contacts === 1
+                        ? "1 Contact"
+                        : `${record.nb_contacts} Contacts`
+                      : "No Contacts"}
                   </TabsTrigger>
-                ) : null}
-              </TabsList>
-              <TabsContent value="activity" className="pt-2">
-                <ActivityLog companyId={record.id} context="company" />
-              </TabsContent>
-              <TabsContent value="contacts">
-                {record.nb_contacts ? (
-                  <ReferenceManyField
-                    reference="contacts_summary"
-                    target="company_id"
-                    sort={{ field: "last_name", order: "ASC" }}
-                  >
+                  {record.nb_deals ? (
+                    <TabsTrigger value="deals">
+                      {record.nb_deals === 1
+                        ? "1 deal"
+                        : `${record.nb_deals} deals`}
+                    </TabsTrigger>
+                  ) : null}
+                </TabsList>
+                <TabsContent value="activity" className="pt-2">
+                  <ActivityLog companyId={record.id} context="company" />
+                </TabsContent>
+                <TabsContent value="contacts">
+                  {record.nb_contacts ? (
+                    <ReferenceManyField
+                      reference="contacts_summary"
+                      target="company_id"
+                      sort={{ field: "last_name", order: "ASC" }}
+                    >
+                      <div className="flex flex-col gap-4">
+                        <div className="flex flex-row justify-end space-x-2 mt-1">
+                          {!!record.nb_contacts && (
+                            <SortButton
+                              fields={["last_name", "first_name", "last_seen"]}
+                            />
+                          )}
+                          <CreateRelatedContactButton />
+                        </div>
+                        <ContactsIterator />
+                      </div>
+                    </ReferenceManyField>
+                  ) : (
                     <div className="flex flex-col gap-4">
                       <div className="flex flex-row justify-end space-x-2 mt-1">
-                        {!!record.nb_contacts && (
-                          <SortButton
-                            fields={["last_name", "first_name", "last_seen"]}
-                          />
-                        )}
                         <CreateRelatedContactButton />
                       </div>
-                      <ContactsIterator />
                     </div>
-                  </ReferenceManyField>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    <div className="flex flex-row justify-end space-x-2 mt-1">
-                      <CreateRelatedContactButton />
-                    </div>
-                  </div>
-                )}
-              </TabsContent>
-              <TabsContent value="deals">
-                {record.nb_deals ? (
-                  <ReferenceManyField
-                    reference="deals"
-                    target="company_id"
-                    sort={{ field: "name", order: "ASC" }}
-                  >
-                    <DealsIterator />
-                  </ReferenceManyField>
-                ) : null}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+                  )}
+                </TabsContent>
+                <TabsContent value="deals">
+                  {record.nb_deals ? (
+                    <ReferenceManyField
+                      reference="deals"
+                      target="company_id"
+                      sort={{ field: "name", order: "ASC" }}
+                    >
+                      <DealsIterator />
+                    </ReferenceManyField>
+                  ) : null}
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+        <CompanyAside />
       </div>
-      <CompanyAside />
-    </div>
+      <div className="mt-4">
+        <CopilotChat />
+      </div>
+    </>
   );
 };
 

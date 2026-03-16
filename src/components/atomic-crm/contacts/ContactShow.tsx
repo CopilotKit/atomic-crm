@@ -10,6 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Pencil } from "lucide-react";
 import { Link } from "react-router";
+import {
+  CopilotChat,
+  useAgent,
+  useCopilotKit,
+} from "@copilotkit/react-core/v2";
+import { randomUUID } from "@copilotkit/shared";
+import { Bot, FileSearch, TrendingUp, Users } from "lucide-react";
 
 import MobileHeader from "../layout/MobileHeader";
 import { MobileContent } from "../layout/MobileContent";
@@ -25,6 +32,8 @@ import type { Contact } from "../types";
 import { Avatar } from "./Avatar";
 import { ContactAside } from "./ContactAside";
 import { MobileBackButton } from "../misc/MobileBackButton";
+import { useCopilotSetup } from "../copilot/hooks/useCopilotSetup";
+import { useContactEnrichment } from "../copilot/useContactEnrichment";
 
 export const ContactShow = () => {
   const isMobile = useIsMobile();
@@ -199,65 +208,150 @@ const ContactShowContentMobile = () => {
 
 const ContactShowContent = () => {
   const { record, isPending } = useShowContext<Contact>();
+  const { agent } = useAgent();
+  const { copilotkit } = useCopilotKit();
+
+  // Enrichment and copilot setup — must be BEFORE any early return
+  const { data: enriched } = useContactEnrichment(
+    record?.first_name,
+    record?.last_name,
+  );
+
+  useCopilotSetup({
+    context: {
+      description:
+        "Current contact record being viewed, with enriched data from the CRM database",
+      value: record && enriched ? { ...record, ...enriched } : (record ?? null),
+    },
+  });
+
   if (isPending || !record) return null;
 
+  const triggerAgent = async (prompt: string) => {
+    agent.addMessage({ id: randomUUID(), role: "user", content: prompt });
+    await copilotkit.runAgent({ agent });
+  };
+
+  const companyName = record.company_name ?? "";
+
   return (
-    <div className="mt-2 mb-2 flex gap-8">
-      <div className="flex-1">
-        <Card>
-          <CardContent>
-            <div className="flex">
-              <Avatar />
-              <div className="ml-2 flex-1">
-                <h5 className="text-xl font-semibold">
-                  <RecordRepresentation />
-                </h5>
-                <div className="inline-flex text-sm text-muted-foreground">
-                  {record.title}
-                  {record.title && record.company_id != null && " at "}
-                  {record.company_id != null && (
-                    <ReferenceField
-                      source="company_id"
-                      reference="companies"
-                      link="show"
-                    >
-                      &nbsp;
-                      <TextField source="name" />
-                    </ReferenceField>
-                  )}
+    <>
+      <div className="mt-2 mb-2 flex gap-8">
+        <div className="flex-1">
+          <Card>
+            <CardContent>
+              <div className="flex">
+                <Avatar />
+                <div className="ml-2 flex-1">
+                  <h5 className="text-xl font-semibold">
+                    <RecordRepresentation />
+                  </h5>
+                  <div className="inline-flex text-sm text-muted-foreground">
+                    {record.title}
+                    {record.title && record.company_id != null && " at "}
+                    {record.company_id != null && (
+                      <ReferenceField
+                        source="company_id"
+                        reference="companies"
+                        link="show"
+                      >
+                        &nbsp;
+                        <TextField source="name" />
+                      </ReferenceField>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <ReferenceField
+                    source="company_id"
+                    reference="companies"
+                    link="show"
+                    className="no-underline"
+                  >
+                    <CompanyAvatar />
+                  </ReferenceField>
                 </div>
               </div>
-              <div>
-                <ReferenceField
-                  source="company_id"
-                  reference="companies"
-                  link="show"
-                  className="no-underline"
-                >
-                  <CompanyAvatar />
-                </ReferenceField>
-              </div>
-            </div>
-            <ReferenceManyField
-              target="contact_id"
-              reference="contact_notes"
-              sort={{ field: "date", order: "DESC" }}
-              empty={
-                <NoteCreate reference="contacts" showStatus className="mt-4" />
-              }
-              queryOptions={{
-                // We want infinite pagination so we need to disable placeHolder data to avoid flicker duplicating previous page before showing the new one
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                //@ts-expect-error
-                placeholderData: null,
-              }}
-            >
-              <NotesIterator reference="contacts" showStatus />
-            </ReferenceManyField>
-          </CardContent>
-        </Card>
+              <ReferenceManyField
+                target="contact_id"
+                reference="contact_notes"
+                sort={{ field: "date", order: "DESC" }}
+                empty={
+                  <NoteCreate
+                    reference="contacts"
+                    showStatus
+                    className="mt-4"
+                  />
+                }
+                queryOptions={{
+                  // We want infinite pagination so we need to disable placeHolder data to avoid flicker duplicating previous page before showing the new one
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  //@ts-expect-error
+                  placeholderData: null,
+                }}
+              >
+                <NotesIterator reference="contacts" showStatus />
+              </ReferenceManyField>
+            </CardContent>
+          </Card>
+        </div>
+        <ContactAside />
       </div>
-      <ContactAside />
-    </div>
+      <div className="mt-4 flex gap-2 flex-wrap">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            triggerAgent(
+              `Review the account for ${record.first_name} ${record.last_name} at ${companyName}. Show account summary, missing signals, risk indicators, and next actions.`,
+            )
+          }
+        >
+          <Bot className="h-4 w-4 mr-1" />
+          Review Account
+        </Button>
+        {companyName && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              triggerAgent(
+                `Analyze the contract for ${companyName}. Show the contract risk report.`,
+              )
+            }
+          >
+            <FileSearch className="h-4 w-4 mr-1" />
+            Analyze Contract
+          </Button>
+        )}
+        {enriched?.renewal_amount != null && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              triggerAgent(
+                `Review the renewal forecast for ${record.first_name} ${record.last_name} and propose an adjustment if warranted.`,
+              )
+            }
+          >
+            <TrendingUp className="h-4 w-4 mr-1" />
+            Forecast Review
+          </Button>
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            triggerAgent(`Triage the top leads. Show the lead priority list.`)
+          }
+        >
+          <Users className="h-4 w-4 mr-1" />
+          Lead Triage
+        </Button>
+      </div>
+      <div className="mt-4">
+        <CopilotChat />
+      </div>
+    </>
   );
 };

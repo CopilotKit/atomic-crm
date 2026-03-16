@@ -5,6 +5,7 @@ help:
 
 install: package.json ## install dependencies
 	npm install;
+	@(cd server && npm install)
 
 start-supabase: ## start supabase locally
 	npx supabase start
@@ -21,10 +22,22 @@ supabase-reset-database: ## reset (and clear!) the database
 start-app: ## start the app locally
 	npm run dev
 
+install-server: ## install server dependencies
+	@(cd server && npm install)
+
+start-server: ## start the CopilotKit runtime server
+	@(cd server && npm run dev)
+
+start-mcp: ## start the MCP contract analyzer server
+	@(cd server && npm run dev:mcp)
+
 start: start-supabase start-app ## start the stack locally
 
 start-demo: ## start the app locally in demo mode
 	npm run dev:demo
+
+start-all: ## start everything (app + CopilotKit server + MCP server)
+	npm run dev:all
 
 stop-supabase: ## stop local supabase
 	npx supabase stop

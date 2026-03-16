@@ -1,0 +1,39 @@
+services:
+  # Frontend — Static Site (React + FakeRest, no Supabase needed)
+  - type: web
+    name: atomic-crm-app
+    runtime: static
+    buildCommand: npm install && npm run build:demo
+    staticPublishPath: ./dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_COPILOTKIT_RUNTIME_URL
+        sync: false # Set to: https://<copilot-service>.onrender.com/api/copilotkit
+
+  # CopilotKit Runtime — Web Service (Hono + CopilotKit SDK)
+  - type: web
+    name: atomic-crm-copilot
+    runtime: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm run start
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: MCP_SERVER_URL
+        sync: false # Set to: https://<mcp-service>.onrender.com/mcp
+      - key: ALLOWED_ORIGINS
+        sync: false # Set to: https://<static-site>.onrender.com
+
+  # MCP Contract Analyzer — Web Service
+  - type: web
+    name: atomic-crm-mcp
+    runtime: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm run start:mcp
