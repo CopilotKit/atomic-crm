@@ -63,7 +63,16 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
   : ["http://localhost:5173"];
 
-app.use("/*", cors({ origin: allowedOrigins, credentials: true }));
+app.use(
+  "/*",
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization", "Accept"],
+    exposeHeaders: ["Content-Type"],
+  }),
+);
 
 // Mount CopilotKit endpoint (single-route: client POSTs everything to one URL)
 const copilotApp = createCopilotEndpointSingleRoute({
@@ -126,6 +135,7 @@ app.patch("/api/contacts/:id/forecast", async (c) => {
   return c.json(updated);
 });
 
+// Mount CopilotKit — must come after CORS middleware
 app.route("", copilotApp);
 
 const port = parseInt(process.env.PORT || "4000", 10);
