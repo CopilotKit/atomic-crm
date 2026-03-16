@@ -21,7 +21,7 @@ services:
   - type: web
     name: atomic-crm-copilot
     runtime: node
-    buildCommand: cd server && npm install
+    buildCommand: cd server && npm install --legacy-peer-deps
     startCommand: cd server && npm run start
     envVars:
       - key: OPENAI_API_KEY
@@ -35,5 +35,5 @@ services:
   - type: web
     name: atomic-crm-mcp
     runtime: node
-    buildCommand: cd server && npm install
+    buildCommand: cd server && npm install --legacy-peer-deps
     startCommand: cd server && npm run start:mcp
