@@ -1,6 +1,5 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import type { MiddlewareHandler } from "hono";
 import {
   CopilotRuntime,
   createCopilotEndpointSingleRoute,
@@ -65,27 +64,22 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 
 console.log("CORS allowed origins:", allowedOrigins);
 
-const corsMiddleware: MiddlewareHandler = async (c, next) => {
-  const origin = c.req.header("Origin");
+function withCors(request: Request, response: Response): Response {
+  const origin = request.headers.get("Origin");
   if (origin && allowedOrigins.includes(origin)) {
-    c.header("Access-Control-Allow-Origin", origin);
-    c.header("Access-Control-Allow-Credentials", "true");
-    c.header(
+    response.headers.set("Access-Control-Allow-Origin", origin);
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+    response.headers.set(
       "Access-Control-Allow-Methods",
       "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     );
-    c.header(
+    response.headers.set(
       "Access-Control-Allow-Headers",
       "Content-Type, Authorization, Accept",
     );
   }
-  if (c.req.method === "OPTIONS") {
-    return c.body(null, 204);
-  }
-  await next();
-};
-
-app.use("/*", corsMiddleware);
+  return response;
+}
 
 // Mount CopilotKit endpoint (single-route: client POSTs everything to one URL)
 const copilotApp = createCopilotEndpointSingleRoute({
@@ -152,6 +146,19 @@ app.patch("/api/contacts/:id/forecast", async (c) => {
 app.route("", copilotApp);
 
 const port = parseInt(process.env.PORT || "4000", 10);
-serve({ fetch: app.fetch, port }, (info) => {
-  console.log(`CopilotKit server running on http://localhost:${info.port}`);
-});
+serve(
+  {
+    fetch: async (request) => {
+      // Handle preflight
+      if (request.method === "OPTIONS") {
+        return withCors(request, new Response(null, { status: 204 }));
+      }
+      const response = await app.fetch(request);
+      return withCors(request, response);
+    },
+    port,
+  },
+  (info) => {
+    console.log(`CopilotKit server running on http://localhost:${info.port}`);
+  },
+);
