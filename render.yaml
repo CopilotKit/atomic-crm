@@ -3,7 +3,7 @@ services:
   - type: web
     name: atomic-crm-app
     runtime: static
-    buildCommand: npm install && npm run build:demo
+    buildCommand: npm install && NODE_OPTIONS=--max-old-space-size=4096 npm run build:demo
     staticPublishPath: ./dist
     headers:
       - path: /*
