@@ -180,3 +180,63 @@ input[type="time"] {
     @apply bg-background text-foreground;
   }
 }
+
+/* ── Copilot Workspace ──
+   Strip CopilotChat chrome so it blends into the surrounding card. */
+
+/* Remove CopilotChat outer container border/bg */
+.copilot-workspace-chat .copilot-chat-inline {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+}
+
+/* Messages area: scrollable with max height */
+.copilot-workspace-chat .copilotKitMessages,
+.copilot-workspace-chat [class*="copilotKitMessages"] {
+  height: auto !important;
+  max-height: 32rem !important;
+  overflow-y: auto !important;
+  padding: 0 !important;
+}
+
+/* Strip message bubble backgrounds */
+.copilot-workspace-chat .copilotKitMessage,
+.copilot-workspace-chat [class*="copilotKitMessage"] {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: 100% !important;
+}
+
+/* Hide default message controls (copy, regenerate, thumbs) */
+.copilot-workspace-chat .copilotKitMessageControls,
+.copilot-workspace-chat [class*="copilotKitMessageControl"] {
+  display: none !important;
+}
+
+/* Hide header/footer chrome */
+.copilot-workspace-chat [class*="copilotKitHeader"],
+.copilot-workspace-chat [class*="copilotKitFooter"] {
+  display: none !important;
+}
+
+/* Style the chat input to blend with the card */
+.copilot-workspace-chat textarea {
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  background: transparent !important;
+  font-size: 0.875rem !important;
+  padding: 0.5rem 0.75rem !important;
+  resize: none !important;
+}
+
+/* A2-UI: consistent spacing for streamed primitive blocks */
+.copilot-workspace-chat .space-y-3 > * + * {
+  margin-top: 0.75rem;
+}

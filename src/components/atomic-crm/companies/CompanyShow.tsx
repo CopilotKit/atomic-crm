@@ -3,7 +3,7 @@ import { SortButton } from "@/components/admin/sort-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CopilotChat } from "@copilotkit/react-ui";
+import { CopilotWorkspace } from "../copilot/components/CopilotWorkspace";
 import { formatDistance } from "date-fns";
 import { UserPlus } from "lucide-react";
 import {
@@ -198,9 +198,7 @@ const CompanyShowContent = () => {
         </div>
         <CompanyAside />
       </div>
-      <div className="mt-4">
-        <CopilotChat />
-      </div>
+      <CopilotWorkspace className="mt-4" />
     </>
   );
 };

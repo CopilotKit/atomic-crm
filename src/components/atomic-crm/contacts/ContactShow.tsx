@@ -10,11 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Pencil } from "lucide-react";
 import { Link } from "react-router";
-import {
-  CopilotChat,
-  useAgent,
-  useCopilotKit,
-} from "@copilotkit/react-core/v2";
+import { useAgent, useCopilotKit } from "@copilotkit/react-core/v2";
 import { randomUUID } from "@copilotkit/shared";
 import { Bot, FileSearch, TrendingUp, Users } from "lucide-react";
 
@@ -34,6 +30,7 @@ import { ContactAside } from "./ContactAside";
 import { MobileBackButton } from "../misc/MobileBackButton";
 import { useCopilotSetup } from "../copilot/hooks/useCopilotSetup";
 import { useContactEnrichment } from "../copilot/useContactEnrichment";
+import { CopilotWorkspace } from "../copilot/components/CopilotWorkspace";
 
 export const ContactShow = () => {
   const isMobile = useIsMobile();
@@ -349,9 +346,7 @@ const ContactShowContent = () => {
           Lead Triage
         </Button>
       </div>
-      <div className="mt-4">
-        <CopilotChat />
-      </div>
+      <CopilotWorkspace className="mt-4" />
     </>
   );
 };
