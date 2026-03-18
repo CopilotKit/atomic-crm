@@ -30,10 +30,40 @@ export function useCopilotSetup({ context }: CopilotSetupOptions) {
   // Register all UI components (primitives + composites)
   useRegisterComponents();
 
-  // Show tool execution status for backend tools (MCP, etc.)
+  // Show tool execution status for backend/MCP tools only.
+  // Skip tools that have their own rendering (HITL, useComponent).
+  const ignoredTools = new Set([
+    // HITL tool — has its own render with approve/reject buttons
+    "updateRenewalForecast",
+    // useComponent registrations — rendered by CopilotChatToolCallsView
+    "Heading",
+    "StatCard",
+    "BulletList",
+    "KeyValue",
+    "Alert",
+    "ProgressBar",
+    "Badge",
+    "MetricRow",
+    "SignalList",
+    "RiskSection",
+    "ActionList",
+    "ComparisonCard",
+    "RankedList",
+    "AccountSummary",
+    "MissingSignals",
+    "RiskIndicators",
+    "NextActions",
+    "ContractRiskReport",
+    "ForecastAdjustment",
+    "LeadPriorityList",
+    // Explicit audit tool
+    "logAuditEvent",
+  ]);
+
   useDefaultRenderTool({
     render: ({ name, status, parameters }) => {
-      console.log("[ToolCall]", { name, status, parameters });
+      if (ignoredTools.has(name)) return <></>;
+
       if (status === "complete") {
         logComponentRender(name, (parameters as Record<string, unknown>) ?? {});
       }

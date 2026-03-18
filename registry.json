@@ -686,10 +686,6 @@
           "type": "registry:component"
         },
         {
-          "path": "src/components/atomic-crm/copilot/components/StatusLine.tsx",
-          "type": "registry:component"
-        },
-        {
           "path": "src/components/atomic-crm/copilot/components/CopilotWorkspace.tsx",
           "type": "registry:component"
         },
