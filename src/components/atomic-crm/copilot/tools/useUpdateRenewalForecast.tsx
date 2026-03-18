@@ -142,16 +142,12 @@ function ForecastCard({ args, respond, status, isAdmin }: ForecastCardProps) {
             </Button>
           </div>
         )}
-        {!isAdmin && isExecuting && (
+        {!isAdmin && (
           <p className="text-xs text-muted-foreground mt-2">
             Only admins can approve forecast changes.
           </p>
         )}
-        {status === "complete" && (
-          <p className="text-xs text-muted-foreground mt-2">
-            Decision submitted.
-          </p>
-        )}
+
       </CardContent>
     </Card>
   );
