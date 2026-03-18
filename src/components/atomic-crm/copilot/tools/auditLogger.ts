@@ -41,6 +41,9 @@ function generateSummary(
   toolName: string,
   args: Record<string, unknown>,
 ): string {
+  if (typeof args.summary === "string" && args.summary.length > 0) {
+    return args.summary;
+  }
   const rule = summaryRules[toolName];
   if (rule) return rule(args);
   return `Called ${toolName}`;
