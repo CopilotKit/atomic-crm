@@ -1,0 +1,31 @@
+{
+  "fixtures": [
+    {
+      "match": { "userMessage": "Review the account for" },
+      "response": {
+        "toolCalls": [
+          {
+            "name": "getContactsByCompany",
+            "arguments": "{\"companyName\":\"Gottlieb and Sons\"}"
+          },
+          {
+            "name": "AccountSummary",
+            "arguments": "{\"company\":\"Gottlieb and Sons\",\"contactCount\":12,\"hotCount\":1,\"warmCount\":2,\"coldCount\":6,\"inContractCount\":3}"
+          },
+          {
+            "name": "MissingSignals",
+            "arguments": "{\"signals\":[\"Economic buyer not identified\",\"Budget not confirmed\",\"Legal review not started\",\"Security review pending\"]}"
+          },
+          {
+            "name": "RiskIndicators",
+            "arguments": "{\"championConfidence\":\"Medium\",\"competitorMentioned\":\"RivalCRM\",\"additionalRisks\":[\"No executive sponsor identified\",\"Contract renewal in 90 days\"]}"
+          },
+          {
+            "name": "NextActions",
+            "arguments": "{\"actions\":[{\"action\":\"Schedule discovery call with economic buyer\",\"priority\":\"High\",\"reason\":\"No budget confirmation yet\"},{\"action\":\"Request legal review kickoff\",\"priority\":\"High\",\"reason\":\"Legal review not started with renewal approaching\"},{\"action\":\"Prepare competitive positioning against RivalCRM\",\"priority\":\"Medium\",\"reason\":\"Competitor actively engaged\"}]}"
+          }
+        ]
+      }
+    }
+  ]
+}

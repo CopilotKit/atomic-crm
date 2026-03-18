@@ -1,0 +1,19 @@
+{
+  "fixtures": [
+    {
+      "match": { "userMessage": "Triage the top leads" },
+      "response": {
+        "toolCalls": [
+          {
+            "name": "getTopLeads",
+            "arguments": "{\"limit\":10}"
+          },
+          {
+            "name": "LeadPriorityList",
+            "arguments": "{\"leads\":[{\"name\":\"Suzanne Bode\",\"score\":92,\"lifecycleStage\":\"Qualified\",\"lastActivity\":\"2026-03-15\"},{\"name\":\"Margaret Haley\",\"score\":74,\"lifecycleStage\":\"Prospect\",\"lastActivity\":\"2026-03-10\"},{\"name\":\"Ray Weber\",\"score\":71,\"lifecycleStage\":\"Qualified\",\"lastActivity\":\"2026-03-12\"}]}"
+          }
+        ]
+      }
+    }
+  ]
+}

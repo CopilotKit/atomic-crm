@@ -1,0 +1,10 @@
+{
+  "fixtures": [
+    {
+      "match": {},
+      "response": {
+        "content": "Analysis complete."
+      }
+    }
+  ]
+}

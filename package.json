@@ -5,6 +5,7 @@
   "scripts": {
     "test": "npm run test:unit",
     "test:unit": "vitest --config vitest.config.ts",
+    "test:node": "vitest run --config vitest.node.config.ts",
     "test:integration": "vitest --config vitest.integration.config.ts",
     "dev": "vite",
     "dev:demo": "vite --config vite.demo.config",
@@ -97,6 +98,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@copilotkit/llmock": "^1.4.0",
     "@eslint/js": "^9.22.0",
     "@inquirer/prompts": "^8.2.0",
     "@storybook/react-vite": "^9.1.19",
