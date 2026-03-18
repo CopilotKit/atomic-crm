@@ -6,7 +6,6 @@ import {
   BuiltInAgent,
   InMemoryAgentRunner,
 } from "@copilotkit/runtime/v2";
-import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -169,24 +168,6 @@ app.get("/api/companies/:name/contacts", (c) => {
 app.get("/api/leads/top", (c) => {
   const limit = parseInt(c.req.query("limit") || "10", 10);
   return c.json(getTopLeadsStore(limit));
-});
-
-app.get("/api/contracts/:companyName", (c) => {
-  const companyName = decodeURIComponent(c.req.param("companyName"));
-  const kebab = companyName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-  const filepath = path.join(__dirname, "contracts", `${kebab}.md`);
-  if (!fs.existsSync(filepath)) {
-    return c.json({
-      companyName,
-      error: `No contract found for "${companyName}"`,
-      contractText: null,
-    });
-  }
-  const contractText = fs.readFileSync(filepath, "utf-8");
-  return c.json({ companyName, contractText });
 });
 
 app.patch("/api/contacts/:id/forecast", async (c) => {

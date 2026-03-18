@@ -10,7 +10,6 @@ import { useCreateTask } from "../tools/useCreateTask";
 import { useDraftEmail } from "../tools/useDraftEmail";
 import { useUpdateRenewalForecast } from "../tools/useUpdateRenewalForecast";
 import { useUpdateContactStatus } from "../tools/useUpdateContactStatus";
-// import { useAnalyzeContract } from "../tools/useAnalyzeContract";
 
 interface CopilotSetupOptions {
   context: {
@@ -54,5 +53,4 @@ export function useCopilotSetup({ context }: CopilotSetupOptions) {
   useDraftEmail();
   useUpdateRenewalForecast();
   useUpdateContactStatus();
-  // useAnalyzeContract(); // Disabled — using MCP analyzeContract instead
 }
