@@ -28,7 +28,7 @@ export function StatCard(props: StatCardProps) {
   if (!label && !value) return null;
 
   return (
-    <div className="rounded-md border p-3 text-center">
+    <div className="rounded-md border p-2 text-center flex-1 min-w-16">
       <div className="text-sm text-muted-foreground">{label}</div>
       <div className={`text-2xl font-bold ${color}`}>{value}</div>
       {description && (

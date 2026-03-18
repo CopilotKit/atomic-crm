@@ -17,12 +17,7 @@ export function MetricRow(props: MetricRowProps) {
   if (metrics.length === 0) return null;
 
   return (
-    <div
-      className="grid gap-2"
-      style={{
-        gridTemplateColumns: `repeat(${Math.min(metrics.length, 6)}, minmax(0, 1fr))`,
-      }}
-    >
+    <div className="flex flex-wrap gap-2">
       {metrics.map((metric, index) => {
         if (typeof metric !== "object" || metric === null) return null;
         return (

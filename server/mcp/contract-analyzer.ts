@@ -213,6 +213,9 @@ function createMcpServer(): McpServer {
     resourceUri,
     { mimeType: RESOURCE_MIME_TYPE },
     async () => {
+      console.log(
+        `[MCP App] Resource fetched, HTML length: ${latestRisksHtml.length}`,
+      );
       return {
         contents: [
           {

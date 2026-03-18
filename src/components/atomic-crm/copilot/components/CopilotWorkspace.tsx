@@ -1,9 +1,10 @@
+import React from "react";
 import {
   CopilotChat,
   CopilotChatToolCallsView,
 } from "@copilotkit/react-core/v2";
-import { Bot, Loader2, Sparkles } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Bot, Loader2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 // ─── v2 AssistantMessage ─────────────────────────────────────────────────────
 //
@@ -90,6 +91,22 @@ function WorkspaceUserMessage({
   );
 }
 
+// ─── ScrollView slot: wraps messages in a Card ───────────────────────────────
+
+const CardScrollView = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ children, className, ...props }, ref) => (
+  <Card
+    ref={ref}
+    className={`mb-2 p-2 overflow-y-auto ${className ?? ""}`}
+    {...props}
+  >
+    {children}
+  </Card>
+));
+CardScrollView.displayName = "CardScrollView";
+
 // ─── CopilotWorkspace ────────────────────────────────────────────────────────
 
 interface CopilotWorkspaceProps {
@@ -98,22 +115,16 @@ interface CopilotWorkspaceProps {
 
 export function CopilotWorkspace({ className }: CopilotWorkspaceProps) {
   return (
-    <Card className={className}>
-      <CardContent className="pt-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-semibold">Copilot</span>
-        </div>
-        <div className="copilot-workspace-chat">
-          <CopilotChat
-            className="copilot-chat-inline"
-            messageView={{
-              assistantMessage: WorkspaceAssistantMessage as any,
-              userMessage: WorkspaceUserMessage as any,
-            }}
-          />
-        </div>
-      </CardContent>
-    </Card>
+    <div
+      className={`copilot-workspace-chat [&_[data-testid=copilot-welcome-screen]]:px-0 ${className ?? ""}`}
+    >
+      <CopilotChat
+        className="copilot-chat-inline"
+        messageView={{
+          assistantMessage: WorkspaceAssistantMessage as any,
+          userMessage: WorkspaceUserMessage as any,
+        }}
+      />
+    </div>
   );
 }

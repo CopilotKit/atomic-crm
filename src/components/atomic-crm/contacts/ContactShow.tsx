@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { RecordRepresentation, ShowBase, useShowContext } from "ra-core";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ReferenceField } from "@/components/admin/reference-field";
@@ -12,7 +12,7 @@ import { Pencil } from "lucide-react";
 import { Link } from "react-router";
 import { useAgent, useCopilotKit } from "@copilotkit/react-core/v2";
 import { randomUUID } from "@copilotkit/shared";
-import { Bot, FileSearch, TrendingUp, Users } from "lucide-react";
+import { Bot, FileSearch, TrendingUp, Users, Info } from "lucide-react";
 
 import MobileHeader from "../layout/MobileHeader";
 import { MobileContent } from "../layout/MobileContent";
@@ -207,6 +207,7 @@ const ContactShowContent = () => {
   const { record, isPending } = useShowContext<Contact>();
   const { agent } = useAgent();
   const { copilotkit } = useCopilotKit();
+  const [asideTab, setAsideTab] = useState("info");
 
   // Enrichment and copilot setup — must be BEFORE any early return
   const { data: enriched } = useContactEnrichment(
@@ -222,18 +223,23 @@ const ContactShowContent = () => {
     },
   });
 
-  if (isPending || !record) return null;
+  const triggerAgent = useCallback(
+    async (prompt: string) => {
+      setAsideTab("copilot");
+      agent.addMessage({ id: randomUUID(), role: "user", content: prompt });
+      await copilotkit.runAgent({ agent });
+    },
+    [agent, copilotkit],
+  );
 
-  const triggerAgent = async (prompt: string) => {
-    agent.addMessage({ id: randomUUID(), role: "user", content: prompt });
-    await copilotkit.runAgent({ agent });
-  };
+  if (isPending || !record) return null;
 
   const companyName = record.company_name ?? "";
 
   return (
     <>
       <div className="mt-2 mb-2 flex gap-8">
+        {/* Main content — contact card + notes */}
         <div className="flex-1">
           <Card>
             <CardContent>
@@ -292,61 +298,98 @@ const ContactShowContent = () => {
             </CardContent>
           </Card>
         </div>
-        <ContactAside />
-      </div>
-      <div className="mt-4 flex gap-2 flex-wrap">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            triggerAgent(
-              `Review the account for ${record.first_name} ${record.last_name} at ${companyName}. Show account summary, missing signals, risk indicators, and next actions.`,
-            )
-          }
-        >
-          <Bot className="h-4 w-4 mr-1" />
-          Review Account
-        </Button>
-        {companyName && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              triggerAgent(
-                `Analyze the contract for ${companyName}. Show the contract risk report.`,
-              )
-            }
+
+        {/* Aside — tabbed: Contact Info | Copilot */}
+        <div className="hidden sm:block w-92 min-w-92 sticky top-4 h-[calc(100vh-5rem)] flex flex-col">
+          <Tabs
+            value={asideTab}
+            onValueChange={setAsideTab}
+            className="flex flex-col h-full"
           >
-            <FileSearch className="h-4 w-4 mr-1" />
-            Analyze Contract
-          </Button>
-        )}
-        {enriched?.renewal_amount != null && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              triggerAgent(
-                `Review the renewal forecast for ${record.first_name} ${record.last_name} and propose an adjustment if warranted.`,
-              )
-            }
-          >
-            <TrendingUp className="h-4 w-4 mr-1" />
-            Forecast Review
-          </Button>
-        )}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            triggerAgent(`Triage the top leads. Show the lead priority list.`)
-          }
-        >
-          <Users className="h-4 w-4 mr-1" />
-          Lead Triage
-        </Button>
+            <TabsList className="grid w-full grid-cols-2 mb-3 flex-shrink-0">
+              <TabsTrigger value="info" className="text-xs">
+                <Info className="h-3.5 w-3.5 mr-1" />
+                Contact
+              </TabsTrigger>
+              <TabsTrigger value="copilot" className="text-xs">
+                <Bot className="h-3.5 w-3.5 mr-1" />
+                Copilot
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="info" className="mt-0 flex-1 overflow-y-auto">
+              <ContactAside />
+            </TabsContent>
+
+            <TabsContent
+              value="copilot"
+              className="mt-0 flex-1 overflow-y-auto flex flex-col"
+            >
+              {/* Action buttons */}
+              <div className="flex gap-1.5 flex-wrap mb-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs h-7"
+                  onClick={() =>
+                    triggerAgent(
+                      `Review the account for ${record.first_name} ${record.last_name} at ${companyName}. Show account summary, missing signals, risk indicators, and next actions.`,
+                    )
+                  }
+                >
+                  <Bot className="h-3 w-3 mr-1" />
+                  Review Account
+                </Button>
+                {companyName && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7"
+                    onClick={() =>
+                      triggerAgent(
+                        `Analyze the contract for ${companyName}. Show the contract risk report.`,
+                      )
+                    }
+                  >
+                    <FileSearch className="h-3 w-3 mr-1" />
+                    Analyze Contract
+                  </Button>
+                )}
+                {enriched?.renewal_amount != null && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7"
+                    onClick={() =>
+                      triggerAgent(
+                        `Review the renewal forecast for ${record.first_name} ${record.last_name} and propose an adjustment if warranted.`,
+                      )
+                    }
+                  >
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    Forecast
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs h-7"
+                  onClick={() =>
+                    triggerAgent(
+                      `Triage the top leads. Show the lead priority list.`,
+                    )
+                  }
+                >
+                  <Users className="h-3 w-3 mr-1" />
+                  Leads
+                </Button>
+              </div>
+              {/* Copilot workspace — inside the aside */}
+              <CopilotWorkspace />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
-      <CopilotWorkspace className="mt-4" />
     </>
   );
 };

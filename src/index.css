@@ -226,7 +226,7 @@ input[type="time"] {
   display: none !important;
 }
 
-/* Style the chat input to blend with the card */
+/* Chat input — below the messages card */
 .copilot-workspace-chat textarea {
   border: 1px solid var(--border) !important;
   border-radius: var(--radius) !important;
