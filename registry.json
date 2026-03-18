@@ -666,35 +666,111 @@
           "type": "registry:component"
         },
         {
-          "path": "src/components/atomic-crm/copilot/hooks/useCopilotSetup.ts",
+          "path": "src/components/atomic-crm/copilot/tools/useAnalyzeContract.ts",
           "type": "registry:component"
         },
         {
-          "path": "src/components/atomic-crm/copilot/components/RiskIndicators.tsx",
+          "path": "src/components/atomic-crm/copilot/hooks/useRegisterComponents.ts",
           "type": "registry:component"
         },
         {
-          "path": "src/components/atomic-crm/copilot/components/NextActions.tsx",
+          "path": "src/components/atomic-crm/copilot/hooks/useCopilotSetup.tsx",
           "type": "registry:component"
         },
         {
-          "path": "src/components/atomic-crm/copilot/components/MissingSignals.tsx",
+          "path": "src/components/atomic-crm/copilot/components/StatusLine.tsx",
           "type": "registry:component"
         },
         {
-          "path": "src/components/atomic-crm/copilot/components/LeadPriorityList.tsx",
+          "path": "src/components/atomic-crm/copilot/components/CopilotWorkspace.tsx",
           "type": "registry:component"
         },
         {
-          "path": "src/components/atomic-crm/copilot/components/ForecastAdjustment.tsx",
+          "path": "src/components/atomic-crm/copilot/components/primitives/index.ts",
           "type": "registry:component"
         },
         {
-          "path": "src/components/atomic-crm/copilot/components/ContractRiskReport.tsx",
+          "path": "src/components/atomic-crm/copilot/components/primitives/StatCard.tsx",
           "type": "registry:component"
         },
         {
-          "path": "src/components/atomic-crm/copilot/components/AccountSummary.tsx",
+          "path": "src/components/atomic-crm/copilot/components/primitives/SignalList.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/primitives/RiskSection.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/primitives/RankedList.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/primitives/ProgressBar.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/primitives/MetricRow.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/primitives/KeyValue.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/primitives/Heading.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/primitives/ComparisonCard.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/primitives/BulletList.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/primitives/Badge.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/primitives/Alert.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/primitives/ActionList.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/composites/index.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/composites/RiskIndicators.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/composites/NextActions.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/composites/MissingSignals.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/composites/LeadPriorityList.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/composites/ForecastAdjustment.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/composites/ContractRiskReport.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/composites/AccountSummary.tsx",
           "type": "registry:component"
         },
         {

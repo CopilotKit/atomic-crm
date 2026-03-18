@@ -9,13 +9,14 @@
     "start:mcp": "tsx mcp/contract-analyzer.ts"
   },
   "dependencies": {
-    "@copilotkit/runtime": "latest",
     "@ag-ui/mcp-apps-middleware": "latest",
-    "hono": "^4",
+    "@copilotkit/runtime": "latest",
     "@hono/node-server": "^1",
+    "@modelcontextprotocol/ext-apps": "^1.2.2",
+    "@modelcontextprotocol/sdk": "^1",
+    "hono": "^4",
     "openai": "^4",
     "papaparse": "^5.5.3",
-    "@modelcontextprotocol/sdk": "^1",
     "zod": "^4"
   },
   "devDependencies": {
