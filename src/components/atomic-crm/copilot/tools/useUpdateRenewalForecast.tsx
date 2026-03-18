@@ -46,7 +46,7 @@ export function useUpdateRenewalForecast({
 }
 
 interface ForecastCardProps {
-  args: {
+  args: Partial<{
     contactId: number;
     contactName: string;
     currentCategory: string;
@@ -54,7 +54,7 @@ interface ForecastCardProps {
     currentProbability: number;
     proposedProbability: number;
     reason: string;
-  };
+  }>;
   respond: ((response: unknown) => void) | undefined;
   status: string;
   isAdmin: boolean;
@@ -118,7 +118,7 @@ function ForecastCard({ args, respond, status, isAdmin }: ForecastCardProps) {
                     }),
                   },
                 );
-                await respond({ approved: true });
+                respond({ approved: true });
                 logToolCall("updateRenewalForecast", {
                   contactName: args.contactName,
                   summary: `Approved renewal forecast for ${args.contactName}: ${args.currentCategory} → ${args.proposedCategory}`,
