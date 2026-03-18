@@ -25,86 +25,14 @@ function toKebabCase(name: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-// ─── Contract risk parser ────────────────────────────────────────────────────
-// Parses [HIGH RISK], [MEDIUM RISK], [LOW RISK] annotations from contract markdown
+// ─── HTML template: renders contract markdown with highlighted risk tags ─────
 
-interface ContractRisks {
-  companyName: string;
-  high: string[];
-  medium: string[];
-  low: string[];
-}
-
-function parseContractRisks(
-  companyName: string,
-  contractText: string,
-): ContractRisks {
-  const risks: ContractRisks = { companyName, high: [], medium: [], low: [] };
-  const sections = contractText.split(/^## /m);
-
-  for (const section of sections) {
-    const lines = section.trim().split("\n");
-    const title = lines[0]?.replace(/^#+\s*/, "").trim() || "";
-
-    if (section.includes("[HIGH RISK]")) {
-      // Extract the paragraph after the risk tag
-      const desc = section
-        .replace(/\*\*\[HIGH RISK\]\*\*\s*/g, "")
-        .split("\n")
-        .filter((l) => l.trim() && !l.startsWith("#"))
-        .map((l) => l.trim())
-        .join(" ")
-        .slice(0, 200);
-      risks.high.push(`${title}: ${desc}`);
-    } else if (section.includes("[MEDIUM RISK]")) {
-      const desc = section
-        .replace(/\*\*\[MEDIUM RISK\]\*\*\s*/g, "")
-        .split("\n")
-        .filter((l) => l.trim() && !l.startsWith("#"))
-        .map((l) => l.trim())
-        .join(" ")
-        .slice(0, 200);
-      risks.medium.push(`${title}: ${desc}`);
-    } else if (section.includes("[LOW RISK]")) {
-      const desc = section
-        .replace(/\*\*\[LOW RISK\]\*\*\s*/g, "")
-        .split("\n")
-        .filter((l) => l.trim() && !l.startsWith("#"))
-        .map((l) => l.trim())
-        .join(" ")
-        .slice(0, 200);
-      risks.low.push(`${title}: ${desc}`);
-    }
-  }
-
-  return risks;
-}
-
-// ─── HTML template for the MCP App UI ────────────────────────────────────────
-
-function buildContractRiskHtml(risks: ContractRisks): string {
-  const riskSection = (
-    title: string,
-    items: string[],
-    color: string,
-    dotColor: string,
-  ) => {
-    if (items.length === 0) return "";
-    const lis = items
-      .map(
-        (item) => `
-      <li style="display:flex;align-items:flex-start;gap:8px;font-size:14px;margin-bottom:6px">
-        <span style="margin-top:6px;width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0"></span>
-        <span>${item}</span>
-      </li>`,
-      )
-      .join("");
-    return `
-      <div style="margin-bottom:16px">
-        <div style="font-size:14px;font-weight:600;margin-bottom:6px;color:${color}">${title}</div>
-        <ul style="list-style:none;padding:0;margin:0">${lis}</ul>
-      </div>`;
-  };
+function buildContractHtml(_companyName: string, markdown: string): string {
+  // Escape backticks and backslashes for safe embedding in JS template literal
+  const escaped = markdown
+    .replace(/\\/g, "\\\\")
+    .replace(/`/g, "\\`")
+    .replace(/\$/g, "\\$");
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -114,33 +42,91 @@ function buildContractRiskHtml(risks: ContractRisks): string {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      padding: 20px;
+      padding: 16px;
       color: #1a1a1a;
       background: transparent;
-      line-height: 1.5;
+      line-height: 1.6;
+      font-size: 13px;
     }
     @media (prefers-color-scheme: dark) {
       body { color: #e0e0e0; }
+      .risk-high { background: #7f1d1d; color: #fecaca; }
+      .risk-medium { background: #78350f; color: #fef3c7; }
+      .risk-low { background: #14532d; color: #dcfce7; }
+    }
+    h1 { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+    h2 { font-size: 14px; font-weight: 600; margin: 16px 0 8px; }
+    p { margin-bottom: 8px; }
+    hr { border: none; border-top: 1px solid #e5e5e5; margin: 12px 0; }
+    @media (prefers-color-scheme: dark) { hr { border-color: #404040; } }
+    .risk-high {
+      display: inline-block;
+      background: #fee2e2; color: #991b1b;
+      font-size: 11px; font-weight: 600;
+      padding: 1px 6px; border-radius: 4px;
+      margin-right: 4px;
+    }
+    .risk-medium {
+      display: inline-block;
+      background: #fef9c3; color: #854d0e;
+      font-size: 11px; font-weight: 600;
+      padding: 1px 6px; border-radius: 4px;
+      margin-right: 4px;
+    }
+    .risk-low {
+      display: inline-block;
+      background: #dcfce7; color: #166534;
+      font-size: 11px; font-weight: 600;
+      padding: 1px 6px; border-radius: 4px;
+      margin-right: 4px;
     }
   </style>
 </head>
 <body>
-  <div style="font-size:16px;font-weight:600;margin-bottom:16px">
-    ${risks.companyName} — Contract Risk Report
-  </div>
-  ${riskSection("High Risk", risks.high, "#dc2626", "#ef4444")}
-  ${riskSection("Medium Risk", risks.medium, "#d97706", "#f59e0b")}
-  ${riskSection("Low Risk", risks.low, "#16a34a", "#22c55e")}
-  ${risks.high.length === 0 && risks.medium.length === 0 && risks.low.length === 0 ? '<div style="font-size:14px;color:#888">No risk annotations found in contract.</div>' : ""}
+  <div id="content"></div>
   <script>
-    // Report content size once to CopilotKit MCP App host
-    requestAnimationFrame(() => {
-      const height = document.body.scrollHeight;
-      const width = document.body.scrollWidth;
+    const md = \`${escaped}\`;
+    // Minimal markdown parser — handles headings, bold, hr, paragraphs
+    function parseMd(text) {
+      return text
+        .split('\\n\\n')
+        .map(function(block) {
+          block = block.trim();
+          if (!block) return '';
+          // Horizontal rule
+          if (/^---+$/.test(block)) return '<hr>';
+          // Headings
+          if (block.startsWith('# ')) return '<h1>' + inline(block.slice(2)) + '</h1>';
+          if (block.startsWith('## ')) return '<h2>' + inline(block.slice(3)) + '</h2>';
+          if (block.startsWith('### ')) return '<h3>' + inline(block.slice(4)) + '</h3>';
+          // Paragraph
+          return '<p>' + inline(block.replace(/\\n/g, ' ')) + '</p>';
+        })
+        .join('\\n');
+    }
+    function inline(text) {
+      // Bold
+      text = text.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
+      // Italic
+      text = text.replace(/\\*(.+?)\\*/g, '<em>$1</em>');
+      return text;
+    }
+    let html = parseMd(md);
+    // Replace risk tags with colored badges
+    html = html.replace(/<strong>\\[HIGH RISK\\]<\\/strong>/g,
+      '<span class="risk-high">HIGH RISK</span>');
+    html = html.replace(/<strong>\\[MEDIUM RISK\\]<\\/strong>/g,
+      '<span class="risk-medium">MEDIUM RISK</span>');
+    html = html.replace(/<strong>\\[LOW RISK\\]<\\/strong>/g,
+      '<span class="risk-low">LOW RISK</span>');
+    document.getElementById('content').innerHTML = html;
+
+    // Report content size to CopilotKit MCP App host
+    requestAnimationFrame(function() {
       window.parent.postMessage({
         jsonrpc: "2.0",
         method: "ui/notifications/size-changed",
-        params: { width, height }
+        params: { width: document.body.scrollWidth, height: document.body.scrollHeight }
       }, "*");
     });
   </script>
@@ -151,12 +137,7 @@ function buildContractRiskHtml(risks: ContractRisks): string {
 // ─── MCP App Server ──────────────────────────────────────────────────────────
 
 // Module-level cache: persists across requests since the HTTP server stays alive
-let latestRisksHtml = buildContractRiskHtml({
-  companyName: "",
-  high: [],
-  medium: [],
-  low: [],
-});
+let latestHtml = buildContractHtml("", "No contract loaded yet.");
 
 function createMcpServer(): McpServer {
   const server = new McpServer({
@@ -199,19 +180,18 @@ function createMcpServer(): McpServer {
       }
 
       const contractText = fs.readFileSync(filepath, "utf-8");
-      const risks = parseContractRisks(companyName, contractText);
 
       // Update module-level cache so the resource handler serves the correct HTML
-      latestRisksHtml = buildContractRiskHtml(risks);
+      latestHtml = buildContractHtml(companyName, contractText);
       console.log(
-        `[MCP App] Parsed risks: ${risks.high.length} high, ${risks.medium.length} medium, ${risks.low.length} low`,
+        `[MCP App] Built HTML for ${companyName}, length: ${latestHtml.length}`,
       );
 
       return {
         content: [
           {
             type: "text" as const,
-            text: JSON.stringify(risks),
+            text: contractText,
           },
         ],
       };
@@ -226,14 +206,14 @@ function createMcpServer(): McpServer {
     { mimeType: RESOURCE_MIME_TYPE },
     async () => {
       console.log(
-        `[MCP App] Resource fetched, HTML length: ${latestRisksHtml.length}`,
+        `[MCP App] Resource fetched, HTML length: ${latestHtml.length}`,
       );
       return {
         contents: [
           {
             uri: resourceUri,
             mimeType: RESOURCE_MIME_TYPE,
-            text: latestRisksHtml,
+            text: latestHtml,
           },
         ],
       };
