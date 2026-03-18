@@ -184,24 +184,34 @@ input[type="time"] {
 /* ── Copilot Workspace ──
    Strip CopilotChat chrome so it blends into the surrounding card. */
 
-/* Remove CopilotChat outer container border/bg */
+/* CopilotChat outer container: flex column, fills parent */
 .copilot-workspace-chat .copilot-chat-inline {
   border: none !important;
   background: transparent !important;
   box-shadow: none !important;
   border-radius: 0 !important;
-  height: auto !important;
+  height: 100% !important;
   max-height: none !important;
   min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
-/* Messages area: scrollable with max height */
+/* Messages area: scrollable, takes remaining space */
 .copilot-workspace-chat .copilotKitMessages,
 .copilot-workspace-chat [class*="copilotKitMessages"] {
-  height: auto !important;
-  max-height: 32rem !important;
+  flex: 1 !important;
+  min-height: 0 !important;
   overflow-y: auto !important;
   padding: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Override CopilotChat's dynamic paddingBottom on scroll view wrapper.
+   CopilotChat adds large paddingBottom for input overlay positioning,
+   but we use flex layout with input below the scroll area instead. */
+.copilot-workspace-chat [style*="padding-bottom"] {
+  padding-bottom: 0 !important;
 }
 
 /* Strip message bubble backgrounds */
@@ -226,7 +236,14 @@ input[type="time"] {
   display: none !important;
 }
 
-/* Chat input — below the messages card */
+/* Force input container out of absolute positioning into normal flow.
+   CopilotChat defaults to position:absolute for the input overlay. */
+.copilot-workspace-chat .copilot-chat-inline > div:last-child {
+  position: static !important;
+  flex-shrink: 0 !important;
+}
+
+/* Chat input styling */
 .copilot-workspace-chat textarea {
   border: 1px solid var(--border) !important;
   border-radius: var(--radius) !important;

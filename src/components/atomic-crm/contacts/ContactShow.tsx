@@ -323,14 +323,15 @@ const ContactShowContent = () => {
 
             <TabsContent
               value="copilot"
-              className="mt-0 flex-1 overflow-y-auto flex flex-col"
+              className="mt-0 flex-1 min-h-0 flex flex-col"
             >
-              {/* Action buttons */}
-              <div className="flex gap-1.5 flex-wrap mb-3">
+              {/* Action buttons — pinned top, disabled while agent runs */}
+              <div className="flex gap-1.5 flex-wrap mb-3 flex-shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
                   className="text-xs h-7"
+                  disabled={agent.isRunning}
                   onClick={() =>
                     triggerAgent(
                       `Review the account for ${record.first_name} ${record.last_name} at ${companyName}. Show account summary, missing signals, risk indicators, and next actions.`,
@@ -345,6 +346,7 @@ const ContactShowContent = () => {
                     variant="outline"
                     size="sm"
                     className="text-xs h-7"
+                    disabled={agent.isRunning}
                     onClick={() =>
                       triggerAgent(
                         `Analyze the contract for ${companyName}. Show the contract risk report.`,
@@ -360,6 +362,7 @@ const ContactShowContent = () => {
                     variant="outline"
                     size="sm"
                     className="text-xs h-7"
+                    disabled={agent.isRunning}
                     onClick={() =>
                       triggerAgent(
                         `Review the renewal forecast for ${record.first_name} ${record.last_name} and propose an adjustment if warranted.`,
@@ -374,6 +377,7 @@ const ContactShowContent = () => {
                   variant="outline"
                   size="sm"
                   className="text-xs h-7"
+                  disabled={agent.isRunning}
                   onClick={() =>
                     triggerAgent(
                       `Triage the top leads. Show the lead priority list.`,
@@ -385,7 +389,7 @@ const ContactShowContent = () => {
                 </Button>
               </div>
               {/* Copilot workspace — inside the aside */}
-              <CopilotWorkspace />
+              <CopilotWorkspace className="flex-1 min-h-0" />
             </TabsContent>
           </Tabs>
         </div>

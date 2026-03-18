@@ -133,8 +133,8 @@ function buildContractRiskHtml(risks: ContractRisks): string {
   ${riskSection("Low Risk", risks.low, "#16a34a", "#22c55e")}
   ${risks.high.length === 0 && risks.medium.length === 0 && risks.low.length === 0 ? '<div style="font-size:14px;color:#888">No risk annotations found in contract.</div>' : ""}
   <script>
-    // Report content size to CopilotKit MCP App host
-    function reportSize() {
+    // Report content size once to CopilotKit MCP App host
+    requestAnimationFrame(() => {
       const height = document.body.scrollHeight;
       const width = document.body.scrollWidth;
       window.parent.postMessage({
@@ -142,10 +142,7 @@ function buildContractRiskHtml(risks: ContractRisks): string {
         method: "ui/notifications/size-changed",
         params: { width, height }
       }, "*");
-    }
-    // Report after render and on any resize
-    reportSize();
-    new ResizeObserver(reportSize).observe(document.body);
+    });
   </script>
 </body>
 </html>`;

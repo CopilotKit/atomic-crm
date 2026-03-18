@@ -116,7 +116,7 @@ interface CopilotWorkspaceProps {
 export function CopilotWorkspace({ className }: CopilotWorkspaceProps) {
   return (
     <div
-      className={`copilot-workspace-chat [&_[data-testid=copilot-welcome-screen]]:px-0 ${className ?? ""}`}
+      className={`copilot-workspace-chat flex flex-col [&_[data-testid=copilot-welcome-screen]]:px-0 ${className ?? ""}`}
     >
       <CopilotChat
         className="copilot-chat-inline"
