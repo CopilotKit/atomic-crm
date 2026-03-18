@@ -2,6 +2,7 @@ import {
   useAgentContext,
   useDefaultRenderTool,
 } from "@copilotkit/react-core/v2";
+import { useGetIdentity } from "ra-core";
 import { useRegisterComponents } from "./useRegisterComponents";
 import { useSearchContacts } from "../tools/useSearchContacts";
 import { useGetContactsByCompany } from "../tools/useGetContactsByCompany";
@@ -21,10 +22,14 @@ interface CopilotSetupOptions {
 }
 
 export function useCopilotSetup({ context }: CopilotSetupOptions) {
-  // Share app state with agent
+  // Detect user role
+  const { data: identity } = useGetIdentity();
+  const isAdmin = !!(identity as { administrator?: boolean })?.administrator;
+
+  // Share app state with agent, including role
   useAgentContext({
     description: context.description,
-    value: context.value,
+    value: { ...context.value, userRole: isAdmin ? "admin" : "user" },
   });
 
   // Register all UI components (primitives + composites)
@@ -85,7 +90,7 @@ export function useCopilotSetup({ context }: CopilotSetupOptions) {
   useGetTopLeads();
   useCreateTask();
   useDraftEmail();
-  useUpdateRenewalForecast();
+  useUpdateRenewalForecast({ isAdmin });
   useUpdateContactStatus();
   useLogAuditEvent();
 }
