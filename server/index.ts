@@ -6,6 +6,7 @@ import {
   BuiltInAgent,
   InMemoryAgentRunner,
 } from "@copilotkit/runtime/v2";
+import crypto from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -176,6 +177,45 @@ app.patch("/api/contacts/:id/forecast", async (c) => {
   const updated = updateContactForecast(id, body);
   if (!updated) return c.json({ error: "Not found" }, 404);
   return c.json(updated);
+});
+
+// In-memory audit log
+const auditEvents: Array<{
+  id: string;
+  timestamp: string;
+  actionType: string;
+  toolName: string | null;
+  contactName: string | null;
+  companyName: string | null;
+  summary: string;
+}> = [];
+
+app.post("/api/audit", async (c) => {
+  const body = await c.req.json();
+  const event = {
+    id: crypto.randomUUID(),
+    timestamp: new Date().toISOString(),
+    actionType: body.actionType || "tool_call",
+    toolName: body.toolName || null,
+    contactName: body.contactName || null,
+    companyName: body.companyName || null,
+    summary: body.summary || "",
+  };
+  auditEvents.unshift(event);
+  return c.json(event, 201);
+});
+
+app.get("/api/audit", (c) => {
+  const contactName = c.req.query("contactName");
+  const companyName = c.req.query("companyName");
+  let filtered = auditEvents;
+  if (contactName) {
+    filtered = filtered.filter((e) => e.contactName === contactName);
+  }
+  if (companyName) {
+    filtered = filtered.filter((e) => e.companyName === companyName);
+  }
+  return c.json(filtered);
 });
 
 // Mount CopilotKit — must come after CORS middleware

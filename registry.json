@@ -666,10 +666,6 @@
           "type": "registry:component"
         },
         {
-          "path": "src/components/atomic-crm/copilot/tools/useAnalyzeContract.ts",
-          "type": "registry:component"
-        },
-        {
           "path": "src/components/atomic-crm/copilot/hooks/useRegisterComponents.ts",
           "type": "registry:component"
         },

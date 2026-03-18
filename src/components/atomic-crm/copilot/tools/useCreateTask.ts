@@ -1,4 +1,4 @@
-import { useFrontendTool } from "@copilotkit/react-core/v2";
+import { useAuditedFrontendTool as useFrontendTool } from "./useAuditedFrontendTool";
 import { useDataProvider } from "ra-core";
 import { z } from "zod";
 

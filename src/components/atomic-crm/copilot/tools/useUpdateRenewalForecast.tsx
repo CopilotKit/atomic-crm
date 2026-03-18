@@ -2,6 +2,7 @@ import { useHumanInTheLoop } from "@copilotkit/react-core/v2";
 import { z } from "zod";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { logToolCall } from "./auditLogger";
 
 const API_BASE =
   import.meta.env.VITE_COPILOTKIT_API_URL || "http://localhost:4000";
@@ -69,6 +70,10 @@ export function useUpdateRenewalForecast() {
                       },
                     );
                     await respond({ approved: true });
+                    logToolCall("updateRenewalForecast", {
+                      contactName: args.contactName,
+                      summary: `Approved renewal forecast for ${args.contactName}: ${args.currentCategory} → ${args.proposedCategory}`,
+                    });
                   }}
                 >
                   Approve
@@ -76,7 +81,13 @@ export function useUpdateRenewalForecast() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => respond({ approved: false })}
+                  onClick={() => {
+                    respond({ approved: false });
+                    logToolCall("updateRenewalForecast", {
+                      contactName: args.contactName,
+                      summary: `Rejected renewal forecast for ${args.contactName}`,
+                    });
+                  }}
                 >
                   Reject
                 </Button>

@@ -10,6 +10,8 @@ import { useCreateTask } from "../tools/useCreateTask";
 import { useDraftEmail } from "../tools/useDraftEmail";
 import { useUpdateRenewalForecast } from "../tools/useUpdateRenewalForecast";
 import { useUpdateContactStatus } from "../tools/useUpdateContactStatus";
+import { useLogAuditEvent } from "../tools/useLogAuditEvent";
+import { logComponentRender } from "../tools/auditLogger";
 
 interface CopilotSetupOptions {
   context: {
@@ -32,6 +34,9 @@ export function useCopilotSetup({ context }: CopilotSetupOptions) {
   useDefaultRenderTool({
     render: ({ name, status, parameters }) => {
       console.log("[ToolCall]", { name, status, parameters });
+      if (status === "complete") {
+        logComponentRender(name, (parameters as Record<string, unknown>) ?? {});
+      }
       const isComplete = status === "complete";
       return (
         <div className="flex items-center gap-2 text-sm text-muted-foreground py-1">
@@ -53,4 +58,5 @@ export function useCopilotSetup({ context }: CopilotSetupOptions) {
   useDraftEmail();
   useUpdateRenewalForecast();
   useUpdateContactStatus();
+  useLogAuditEvent();
 }
