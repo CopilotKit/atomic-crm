@@ -16,7 +16,7 @@ export function LeadPriorityList(props: LeadPriorityListProps) {
   const leads = Array.isArray(props.leads) ? props.leads : [];
 
   return (
-    <>
+    <div className="space-y-2">
       <Heading text="Lead Priority List" level={2} />
       <RankedList
         items={leads.map((l) => ({
@@ -25,6 +25,6 @@ export function LeadPriorityList(props: LeadPriorityListProps) {
           score: typeof l?.score === "number" ? l.score : 0,
         }))}
       />
-    </>
+    </div>
   );
 }

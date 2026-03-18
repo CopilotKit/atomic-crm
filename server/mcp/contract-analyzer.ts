@@ -32,6 +32,7 @@ function createMcpServer(): McpServer {
         .describe("The company name to look up the contract for"),
     },
     async ({ companyName }) => {
+      console.log(`[MCP] analyzeContract called for: "${companyName}"`);
       const filename = `${toKebabCase(companyName)}.md`;
       const filepath = path.join(contractsDir, filename);
 

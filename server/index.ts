@@ -6,6 +6,7 @@ import {
   BuiltInAgent,
   InMemoryAgentRunner,
 } from "@copilotkit/runtime/v2";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -63,7 +64,7 @@ Then render components. After all components, you may add 1-2 sentences of summa
 
 ## Workflow Guidelines
 - Account Review: call getContactsByCompany tool, then render AccountSummary + MissingSignals + RiskIndicators + NextActions
-- Contract Risk: call analyzeContract MCP tool, then render ContractRiskReport
+- Contract Risk: call analyzeContract tool to get the contract text, then render ContractRiskReport with the identified risks
 - Forecast: render ForecastAdjustment for display, use updateRenewalForecast tool for mutations (triggers human approval)
 - Lead Triage: call getTopLeads tool, then render LeadPriorityList
 - For free-form questions: compose from primitives as appropriate
@@ -72,12 +73,23 @@ Then render components. After all components, you may add 1-2 sentences of summa
 - NEVER invent data. Use only provided application context and tool results.
 - For forecast changes, ALWAYS use updateRenewalForecast tool (triggers human approval).
 - Be concise and actionable.`,
-  mcpServers: [{ type: "http", url: MCP_SERVER_URL }],
 });
 
 const runtime = new CopilotRuntime({
   agents: { default: builtInAgent },
   runner: new InMemoryAgentRunner(),
+  // MCP Apps middleware — contract analyzer available via MCP protocol.
+  // Note: the frontend also registers an analyzeContract tool via useFrontendTool
+  // which shadows the MCP tool and handles the multi-turn loop correctly.
+  mcpApps: {
+    servers: [
+      {
+        type: "http" as const,
+        url: MCP_SERVER_URL,
+        serverId: "contract-analyzer",
+      },
+    ],
+  },
 });
 
 // Main Hono app
@@ -157,6 +169,24 @@ app.get("/api/companies/:name/contacts", (c) => {
 app.get("/api/leads/top", (c) => {
   const limit = parseInt(c.req.query("limit") || "10", 10);
   return c.json(getTopLeadsStore(limit));
+});
+
+app.get("/api/contracts/:companyName", (c) => {
+  const companyName = decodeURIComponent(c.req.param("companyName"));
+  const kebab = companyName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  const filepath = path.join(__dirname, "contracts", `${kebab}.md`);
+  if (!fs.existsSync(filepath)) {
+    return c.json({
+      companyName,
+      error: `No contract found for "${companyName}"`,
+      contractText: null,
+    });
+  }
+  const contractText = fs.readFileSync(filepath, "utf-8");
+  return c.json({ companyName, contractText });
 });
 
 app.patch("/api/contacts/:id/forecast", async (c) => {

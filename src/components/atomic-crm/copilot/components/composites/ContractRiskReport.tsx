@@ -16,11 +16,11 @@ export function ContractRiskReport(props: ContractRiskReportProps) {
   const lowRisks = Array.isArray(props.lowRisks) ? props.lowRisks : [];
 
   return (
-    <>
+    <div className="space-y-2">
       <Heading text={`${companyName} — Contract Risk Report`} level={2} />
       <RiskSection title="High Risk" items={highRisks} severity="high" />
       <RiskSection title="Medium Risk" items={mediumRisks} severity="medium" />
       <RiskSection title="Low Risk" items={lowRisks} severity="low" />
-    </>
+    </div>
   );
 }

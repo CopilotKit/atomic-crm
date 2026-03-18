@@ -21,7 +21,7 @@ export function RiskIndicators(props: RiskIndicatorsProps) {
     : [];
 
   return (
-    <>
+    <div className="space-y-2">
       <KeyValue
         pairs={[
           { key: "Champion Confidence", value: championConfidence },
@@ -31,6 +31,6 @@ export function RiskIndicators(props: RiskIndicatorsProps) {
       {additionalRisks.length > 0 && (
         <BulletList items={additionalRisks} icon="warning" />
       )}
-    </>
+    </div>
   );
 }

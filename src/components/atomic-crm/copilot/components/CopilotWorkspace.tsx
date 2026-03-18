@@ -1,85 +1,20 @@
-import { useState, useEffect, useRef } from "react";
 import {
   CopilotChat,
   CopilotChatToolCallsView,
 } from "@copilotkit/react-core/v2";
-import { Bot, ChevronDown, ChevronRight, Sparkles } from "lucide-react";
+import { Bot, Loader2, Check, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { StatusLine } from "./StatusLine";
 
-// ─── Status Stream: renders agent text as multi-step status lines ────────────
-
-function StatusStream({
-  content,
-  isRunning,
-  toolCallCount,
-}: {
-  content: string;
-  isRunning: boolean;
-  toolCallCount: number;
-}) {
-  const [expanded, setExpanded] = useState(true);
-  const wasRunning = useRef(isRunning);
-
-  // Auto-collapse when agent finishes
-  useEffect(() => {
-    if (wasRunning.current && !isRunning) {
-      setExpanded(false);
-    }
-    wasRunning.current = isRunning;
-  }, [isRunning]);
-
-  const lines = content
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
-
-  if (lines.length === 0) return null;
-
-  // While running, always show expanded
-  if (isRunning) {
-    return (
-      <div className="space-y-1 py-1">
-        {lines.map((line, index) => (
-          <StatusLine
-            key={index}
-            text={line}
-            isActive={index === lines.length - 1}
-          />
-        ))}
-      </div>
-    );
-  }
-
-  // After completion: collapsible summary
-  const summary = `Analyzed · ${toolCallCount} block${toolCallCount !== 1 ? "s" : ""} · ${lines.length} step${lines.length !== 1 ? "s" : ""}`;
-
-  return (
-    <div className="py-1">
-      <button
-        type="button"
-        onClick={() => setExpanded((prev) => !prev)}
-        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-      >
-        {expanded ? (
-          <ChevronDown className="h-3 w-3" />
-        ) : (
-          <ChevronRight className="h-3 w-3" />
-        )}
-        {summary}
-      </button>
-      {expanded && (
-        <div className="space-y-1 mt-1">
-          {lines.map((line, index) => (
-            <StatusLine key={index} text={line} isActive={false} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── v2 AssistantMessage: status stream + tool call blocks + text ────────────
+// ─── v2 AssistantMessage ─────────────────────────────────────────────────────
+//
+// Renders:
+// 1. Tool call blocks via CopilotChatToolCallsView (generative UI)
+// 2. Text content as status lines (if message also has tool calls)
+//    or as normal chat text (if message has no tool calls)
+//
+// Key: CopilotChatToolCallsView is rendered exactly as in the original
+// working code — no extra wrappers or conditional state that could
+// interfere with CopilotKit's internal rendering lifecycle.
 
 function WorkspaceAssistantMessage({
   message,
@@ -100,19 +35,27 @@ function WorkspaceAssistantMessage({
   const textContent = message.content?.trim();
   const isLatest =
     (messages as Array<{ id: string }>)?.at(-1)?.id === message.id;
-  const isActivelyRunning = isRunning && isLatest;
+  const isThinking = isRunning && isLatest && !textContent && !hasToolCalls;
 
-  // If message has tool calls + text → text is status lines (per spec heuristic)
-  const isStatusMessage = hasToolCalls && !!textContent;
-  // If message has only text (no tool calls) → normal text message
-  const isTextOnly = !hasToolCalls && !!textContent;
-  // Thinking state: running, latest, no content yet
-  const isThinking = isActivelyRunning && !textContent && !hasToolCalls;
+  // DEBUG: log message structure to understand CopilotKit's rendering
+  console.log("[CopilotMsg]", {
+    id: message.id?.slice(0, 8),
+    role: message.role,
+    hasText: !!textContent,
+    textPreview: textContent?.slice(0, 50),
+    toolCallCount: message.toolCalls?.length ?? 0,
+    toolCallNames: (message.toolCalls as any[])?.map(
+      (tc: any) => tc?.function?.name ?? tc?.name ?? "unknown",
+    ),
+    isLatest,
+    isRunning,
+  });
 
   if (isThinking) {
     return (
-      <div className="py-1">
-        <StatusLine text="Thinking..." isActive />
+      <div className="flex items-center gap-2 py-3 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span>Thinking...</span>
       </div>
     );
   }
@@ -120,38 +63,78 @@ function WorkspaceAssistantMessage({
   if (!textContent && !hasToolCalls) return null;
 
   return (
-    <div className="space-y-3 py-1">
-      {/* Status stream (text in a message that also has tool calls) */}
-      {isStatusMessage && (
-        <StatusStream
-          content={textContent}
-          isRunning={isActivelyRunning}
-          toolCallCount={message.toolCalls?.length ?? 0}
+    <div className="space-y-2 py-1">
+      {/* Tool call blocks — rendered first, same as original working code */}
+      {hasToolCalls && (
+        <CopilotChatToolCallsView
+          message={message as any}
+          messages={messages as any}
         />
       )}
 
-      {/* Generative UI blocks rendered via tool calls */}
-      {hasToolCalls && (
-        <div className="space-y-3">
-          <CopilotChatToolCallsView
-            message={message as any}
-            messages={messages as any}
+      {/* Text: status lines (if message has tool calls) or chat text */}
+      {textContent &&
+        (hasToolCalls ? (
+          <StatusLines
+            content={textContent}
+            isRunning={isRunning && isLatest}
           />
-        </div>
-      )}
+        ) : (
+          <div className="flex items-start gap-2">
+            <Bot className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+            <p className="text-sm leading-relaxed text-foreground">
+              {textContent}
+              {isRunning && isLatest && (
+                <span className="inline-block w-1.5 h-4 bg-foreground/50 animate-pulse ml-0.5 align-text-bottom" />
+              )}
+            </p>
+          </div>
+        ))}
+    </div>
+  );
+}
 
-      {/* Normal text response (messages without tool calls) */}
-      {isTextOnly && (
-        <div className="flex items-start gap-2">
-          <Bot className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
-          <p className="text-sm leading-relaxed text-foreground">
-            {textContent}
-            {isActivelyRunning && (
-              <span className="inline-block w-1.5 h-4 bg-foreground/50 animate-pulse ml-0.5 align-text-bottom" />
+// ─── StatusLines: stateless rendering of agent text as status entries ─────────
+//
+// No useState, no useEffect — purely derived from props.
+// This avoids interfering with CopilotKit's rendering lifecycle.
+
+function StatusLines({
+  content,
+  isRunning,
+}: {
+  content: string;
+  isRunning: boolean;
+}) {
+  const lines = content
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  if (lines.length === 0) return null;
+
+  return (
+    <div className="space-y-1">
+      {lines.map((line, index) => {
+        const isLast = index === lines.length - 1;
+        const isActive = isRunning && isLast;
+
+        return (
+          <div
+            key={index}
+            className={`flex items-center gap-2 text-sm transition-opacity ${
+              isActive ? "opacity-100" : "opacity-50"
+            }`}
+          >
+            {isActive ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground flex-shrink-0" />
+            ) : (
+              <Check className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
             )}
-          </p>
-        </div>
-      )}
+            <span className="text-muted-foreground">{line}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }

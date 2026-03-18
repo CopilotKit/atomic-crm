@@ -27,7 +27,7 @@ export function ForecastAdjustment(props: ForecastAdjustmentProps) {
   const reason = typeof props.reason === "string" ? props.reason : "";
 
   return (
-    <>
+    <div className="space-y-2">
       <Heading text={`Forecast Adjustment — ${contactName}`} level={2} />
       <ComparisonCard
         title=""
@@ -57,6 +57,6 @@ export function ForecastAdjustment(props: ForecastAdjustmentProps) {
           {reason}
         </div>
       )}
-    </>
+    </div>
   );
 }

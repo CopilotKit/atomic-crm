@@ -21,7 +21,7 @@ export function AccountSummary(props: AccountSummaryProps) {
     typeof props.inContractCount === "number" ? props.inContractCount : 0;
 
   return (
-    <>
+    <div className="space-y-2">
       <Heading text={company} level={2} />
       <MetricRow
         metrics={[
@@ -36,6 +36,6 @@ export function AccountSummary(props: AccountSummaryProps) {
           },
         ]}
       />
-    </>
+    </div>
   );
 }
