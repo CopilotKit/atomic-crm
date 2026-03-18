@@ -650,6 +650,10 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/copilot/tools/useLogAuditEvent.ts",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/copilot/tools/useGetTopLeads.ts",
           "type": "registry:component"
         },
@@ -663,6 +667,14 @@
         },
         {
           "path": "src/components/atomic-crm/copilot/tools/useCreateTask.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/tools/useAuditedFrontendTool.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/tools/auditLogger.ts",
           "type": "registry:component"
         },
         {
@@ -923,6 +935,10 @@
         },
         {
           "path": "src/components/atomic-crm/companies/AutocompleteCompanyInput.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/audit/AuditLogPage.tsx",
           "type": "registry:component"
         },
         {
