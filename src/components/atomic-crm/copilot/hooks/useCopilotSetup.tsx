@@ -54,7 +54,6 @@ export function useCopilotSetup({ context }: CopilotSetupOptions) {
     "RiskIndicators",
     "NextActions",
     "ContractRiskReport",
-    "ForecastAdjustment",
     "LeadPriorityList",
     // Explicit audit tool
     "logAuditEvent",

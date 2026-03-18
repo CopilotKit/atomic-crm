@@ -64,7 +64,7 @@ ContractRiskReport, ForecastAdjustment, LeadPriorityList
 ## Workflow Guidelines
 - Account Review: call getContactsByCompany tool, then render AccountSummary + MissingSignals + RiskIndicators + NextActions
 - Contract Risk: call analyzeContract tool to get the contract text, then render ContractRiskReport with the identified risks
-- Forecast: render ForecastAdjustment for display, use updateRenewalForecast tool for mutations (triggers human approval)
+- Forecast: use updateRenewalForecast tool (shows proposal card with approve/reject buttons, triggers human approval)
 - Lead Triage: call getTopLeads tool, then render LeadPriorityList
 - For free-form questions: compose from primitives as appropriate
 

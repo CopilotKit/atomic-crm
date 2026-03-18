@@ -22,7 +22,6 @@ import { MissingSignals } from "../components/composites/MissingSignals";
 import { RiskIndicators } from "../components/composites/RiskIndicators";
 import { NextActions } from "../components/composites/NextActions";
 import { ContractRiskReport } from "../components/composites/ContractRiskReport";
-import { ForecastAdjustment } from "../components/composites/ForecastAdjustment";
 import { LeadPriorityList } from "../components/composites/LeadPriorityList";
 
 export function useRegisterComponents() {
@@ -267,20 +266,9 @@ export function useRegisterComponents() {
     render: ContractRiskReport,
   });
 
-  useComponent({
-    name: "ForecastAdjustment",
-    description:
-      "Display a forecast adjustment proposal comparing current and proposed renewal probability. Use for renewal forecast workflows.",
-    parameters: z.object({
-      contactName: z.string(),
-      currentCategory: z.string(),
-      proposedCategory: z.string(),
-      currentProbability: z.number(),
-      proposedProbability: z.number(),
-      reason: z.string(),
-    }),
-    render: ForecastAdjustment,
-  });
+  // ForecastAdjustment display-only component removed —
+  // updateRenewalForecast (useHumanInTheLoop) shows the same data
+  // plus approve/reject buttons. Having both confused the agent.
 
   useComponent({
     name: "LeadPriorityList",
