@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useMemo } from "react";
 import { driver as createDriver, type Driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import type { DemoStateOrDone, AgentPhase } from "./useDemoStateMachine";
@@ -89,6 +89,7 @@ export function useDemoDriver({
       allowKeyboardControl: false,
       stagePadding: 8,
       stageRadius: 8,
+      overlayOpacity: 0.5,
     });
     return () => {
       driverRef.current?.destroy();
@@ -96,8 +97,8 @@ export function useDemoDriver({
     };
   }, []);
 
-  const steps = getDemoSteps(autoAgent);
-  const autoAgentSteps = getDemoSteps(true);
+  const steps = useMemo(() => getDemoSteps(autoAgent), [autoAgent]);
+  const autoAgentSteps = useMemo(() => getDemoSteps(true), []);
 
   const highlightState = useCallback(
     async (demoState: DemoStateOrDone, stepOverride?: DemoStepDef) => {
@@ -110,20 +111,19 @@ export function useDemoDriver({
       const stepDef = stepOverride ?? steps[demoState as keyof typeof steps];
       if (!stepDef) return;
 
+      const refs = { advanceRef, resetRef, canAdvanceRef, errorCountRef };
+
       if (stepDef.element === null) {
-        // S0: centered modal via drive() with a single step (no element target)
-        d.setSteps([
-          {
-            popover: {
-              title: stepDef.title,
-              description: stepDef.description,
-              onPopoverRender: (popover) => {
-                renderPopoverButtons(popover.wrapper, stepDef, errorCountRef);
-              },
+        // S0: centered modal — highlight() without element shows centered popover
+        d.highlight({
+          popover: {
+            title: stepDef.title,
+            description: stepDef.description,
+            onPopoverRender: (popover) => {
+              renderPopoverButtons(popover.wrapper, stepDef, refs);
             },
           },
-        ]);
-        d.drive();
+        });
         setElementReady(true);
         return;
       }
@@ -143,7 +143,7 @@ export function useDemoDriver({
           description: stepDef.description,
           side: stepDef.side,
           onPopoverRender: (popover) => {
-            renderPopoverButtons(popover.wrapper, stepDef, errorCountRef);
+            renderPopoverButtons(popover.wrapper, stepDef, refs);
           },
         },
       });
@@ -243,10 +243,17 @@ function createActionButton(
   return btn;
 }
 
+interface PopoverButtonRefs {
+  advanceRef: { current: () => void };
+  resetRef: { current: () => void };
+  canAdvanceRef: { current: boolean };
+  errorCountRef: { current: number };
+}
+
 function renderPopoverButtons(
   wrapper: Element,
   stepDef: DemoStepDef,
-  _errorCountRef: { current: number },
+  refs: PopoverButtonRefs,
 ) {
   const footer = wrapper.querySelector(".driver-popover-footer");
   if (footer) footer.remove();
@@ -261,21 +268,19 @@ function renderPopoverButtons(
   exitBtn.style.cssText =
     "padding:6px 12px;border-radius:6px;font-size:13px;cursor:pointer;border:1px solid #d1d5db;background:#fff;color:#374151;";
   exitBtn.addEventListener("click", () => {
-    const resetFn = (window as any).__demoReset;
-    if (resetFn) resetFn();
+    refs.resetRef.current();
   });
   btnContainer.appendChild(exitBtn);
 
   if (!stepDef.autoTransition) {
+    const isEnabled = refs.canAdvanceRef.current;
     const nextBtn = document.createElement("button");
     nextBtn.textContent = stepDef.advanceLabel ?? "Next";
     nextBtn.setAttribute("data-demo-btn", "next");
-    nextBtn.style.cssText =
-      "padding:6px 12px;border-radius:6px;font-size:13px;cursor:pointer;border:none;background:#2563eb;color:#fff;opacity:0.5;";
-    nextBtn.disabled = true;
+    nextBtn.disabled = !isEnabled;
+    nextBtn.style.cssText = `padding:6px 12px;border-radius:6px;font-size:13px;cursor:pointer;border:none;background:#2563eb;color:#fff;opacity:${isEnabled ? "1" : "0.5"};`;
     nextBtn.addEventListener("click", () => {
-      const advanceFn = (window as any).__demoAdvance;
-      if (advanceFn) advanceFn();
+      refs.advanceRef.current();
     });
     btnContainer.appendChild(nextBtn);
   }

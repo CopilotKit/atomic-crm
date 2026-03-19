@@ -6,7 +6,7 @@ import {
   useRef,
   type ReactNode,
 } from "react";
-import { useSearchParams, useNavigate, useLocation } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useAgent, useCopilotKit } from "@copilotkit/react-core/v2";
 import { randomUUID } from "@copilotkit/shared";
 import { useDataProvider } from "ra-core";
@@ -16,18 +16,23 @@ import { useDemoDriver } from "./useDemoDriver";
 import { DEMO_CONTACT, DEMO_PROMPTS } from "./demoConfig";
 
 export function DemoProvider({ children }: { children: ReactNode }) {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const isDemoMode = searchParams.get("demo") === "guided";
-  const autoAgent = isDemoMode && searchParams.get("autoAgent") === "true";
+  // Read from window.location directly — ra-core's router strips query params
+  // from useSearchParams, but the URL still has them.
+  const [isDemoMode] = useState(
+    () => new URLSearchParams(window.location.search).get("demo") === "guided",
+  );
+  const [autoAgent] = useState(
+    () =>
+      isDemoMode &&
+      new URLSearchParams(window.location.search).get("autoAgent") === "true",
+  );
 
   if (!isDemoMode) {
     return <DemoInactiveProvider>{children}</DemoInactiveProvider>;
   }
 
   return (
-    <DemoActiveProvider autoAgent={autoAgent} setSearchParams={setSearchParams}>
-      {children}
-    </DemoActiveProvider>
+    <DemoActiveProvider autoAgent={autoAgent}>{children}</DemoActiveProvider>
   );
 }
 
@@ -54,15 +59,10 @@ function DemoInactiveProvider({ children }: { children: ReactNode }) {
 
 interface DemoActiveProviderProps {
   autoAgent: boolean;
-  setSearchParams: ReturnType<typeof useSearchParams>[1];
   children: ReactNode;
 }
 
-function DemoActiveProvider({
-  autoAgent,
-  setSearchParams,
-  children,
-}: DemoActiveProviderProps) {
+function DemoActiveProvider({ autoAgent, children }: DemoActiveProviderProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const dataProvider = useDataProvider();
@@ -113,6 +113,47 @@ function DemoActiveProvider({
     machine.dispatch({ type: "AGENT_ERROR" });
   }, [machine.dispatch]);
 
+  // Wrap reset to also clean up URL params
+  const resetWithCleanup = useCallback(() => {
+    machine.reset();
+    const url = new URL(window.location.href);
+    url.searchParams.delete("demo");
+    url.searchParams.delete("autoAgent");
+    window.history.replaceState({}, "", url.pathname + url.search);
+    navigate("/");
+  }, [machine.reset, navigate]);
+
+  // Track agent.isRunning transitions → dispatch agentPhase changes.
+  // This handles both autoAgent mode (where we trigger the agent) and manual
+  // mode (where the user clicks the action button themselves).
+  const AGENT_PHASE_STATES = [
+    "S2_AGENT_REVIEW",
+    "S3_CONTRACT_ANALYSIS",
+    "S4_FORECAST_PROPOSAL",
+    "S5_APPROVAL_PENDING",
+  ];
+  const prevAgentRunning = useRef(false);
+  useEffect(() => {
+    const currentState = machine.machineState.state;
+    const phase = machine.machineState.agentPhase;
+    if (!AGENT_PHASE_STATES.includes(currentState as string)) {
+      prevAgentRunning.current = agent.isRunning;
+      return;
+    }
+    if (agent.isRunning && phase === "idle") {
+      machine.dispatch({ type: "AGENT_STARTED" });
+    }
+    if (!agent.isRunning && prevAgentRunning.current && phase === "running") {
+      machine.dispatch({ type: "AGENT_FINISHED" });
+    }
+    prevAgentRunning.current = agent.isRunning;
+  }, [
+    agent.isRunning,
+    machine.machineState.state,
+    machine.machineState.agentPhase,
+    machine.dispatch,
+  ]);
+
   useDemoDriver({
     state: machine.machineState.state,
     agentPhase: machine.machineState.agentPhase,
@@ -120,7 +161,7 @@ function DemoActiveProvider({
     errorCount: machine.machineState.errorCount,
     autoAgent,
     advance: machine.advance,
-    reset: machine.reset,
+    reset: resetWithCleanup,
     skipState: machine.skipState,
     reportError,
     setElementReady: machine.setElementReady,
@@ -163,24 +204,6 @@ function DemoActiveProvider({
     machine.dispatch,
   ]);
 
-  // Expose callbacks to driver.js popover buttons (outside React tree)
-  useEffect(() => {
-    (window as any).__demoAdvance = machine.advance;
-    (window as any).__demoReset = () => {
-      machine.reset();
-      setSearchParams((prev) => {
-        const next = new URLSearchParams(prev);
-        next.delete("demo");
-        next.delete("autoAgent");
-        return next;
-      });
-    };
-    return () => {
-      delete (window as any).__demoAdvance;
-      delete (window as any).__demoReset;
-    };
-  }, [machine.advance, machine.reset, setSearchParams]);
-
   // Navigate to / on init (runs once when contactId is resolved)
   const hasInitNavigated = useRef(false);
   useEffect(() => {
@@ -206,7 +229,7 @@ function DemoActiveProvider({
       canAdvance: machine.canAdvance,
       errorCount: machine.machineState.errorCount,
       advance: machine.advance,
-      reset: machine.reset,
+      reset: resetWithCleanup,
       skipState: machine.skipState,
       reportError,
       requestCopilotTab,
@@ -218,7 +241,7 @@ function DemoActiveProvider({
       machine.canAdvance,
       machine.machineState.errorCount,
       machine.advance,
-      machine.reset,
+      resetWithCleanup,
       machine.skipState,
       reportError,
       requestCopilotTab,
@@ -235,15 +258,7 @@ function DemoActiveProvider({
             <p className="text-sm text-muted-foreground mb-4">{initError}</p>
             <button
               className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm"
-              onClick={() => {
-                setSearchParams((prev) => {
-                  const next = new URLSearchParams(prev);
-                  next.delete("demo");
-                  next.delete("autoAgent");
-                  return next;
-                });
-                navigate("/");
-              }}
+              onClick={() => resetWithCleanup()}
             >
               Close
             </button>
