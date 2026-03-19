@@ -1,0 +1,15 @@
+export const DEMO_CONTACT = {
+  firstName: "Fannie",
+  lastName: "Pfeffer",
+  companyName: "Schmitt and Sons",
+};
+
+export const DEMO_PROMPTS = {
+  S2_AGENT_REVIEW: `Review the account for ${DEMO_CONTACT.firstName} ${DEMO_CONTACT.lastName} at ${DEMO_CONTACT.companyName}. Show account summary, missing signals, risk indicators, and next actions.`,
+  S3_CONTRACT_ANALYSIS: `Analyze the contract for ${DEMO_CONTACT.companyName}. Show the contract risk report.`,
+  S4_FORECAST_PROPOSAL: `Review the renewal forecast for ${DEMO_CONTACT.firstName} ${DEMO_CONTACT.lastName} and propose an adjustment if warranted.`,
+};
+
+export const DOM_POLL_TIMEOUT_MS = 5000;
+export const DOM_POLL_INTERVAL_MS = 100;
+export const MAX_AGENT_RETRIES = 2;
