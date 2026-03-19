@@ -12,7 +12,7 @@ import { Pencil } from "lucide-react";
 import { Link } from "react-router";
 import { useAgent, useCopilotKit } from "@copilotkit/react-core/v2";
 import { randomUUID } from "@copilotkit/shared";
-import { Bot, FileSearch, TrendingUp, Users, Info } from "lucide-react";
+import { Bot, FileSearch, TrendingUp, Info } from "lucide-react";
 
 import MobileHeader from "../layout/MobileHeader";
 import { MobileContent } from "../layout/MobileContent";
@@ -385,20 +385,6 @@ const ContactShowContent = () => {
                     Forecast
                   </Button>
                 )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs h-7"
-                  disabled={agent.isRunning}
-                  onClick={() =>
-                    triggerAgent(
-                      `Triage the top leads. Show the lead priority list.`,
-                    )
-                  }
-                >
-                  <Users className="h-3 w-3 mr-1" />
-                  Leads
-                </Button>
               </div>
               {/* Copilot workspace — inside the aside */}
               <CopilotWorkspace className="flex-1 min-h-0" />

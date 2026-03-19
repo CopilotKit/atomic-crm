@@ -90,7 +90,7 @@ export function useCopilotSetup({ context }: CopilotSetupOptions) {
   useGetTopLeads();
   useCreateTask();
   useDraftEmail();
-  useUpdateRenewalForecast({ isAdmin });
+  useUpdateRenewalForecast();
   useUpdateContactStatus();
   useLogAuditEvent();
 }

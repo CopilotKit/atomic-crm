@@ -1,6 +1,7 @@
 import { useHumanInTheLoop } from "@copilotkit/react-core/v2";
 import { z } from "zod";
 import { useEffect, useRef } from "react";
+import { useGetIdentity } from "ra-core";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { logToolCall } from "./auditLogger";
@@ -8,13 +9,7 @@ import { logToolCall } from "./auditLogger";
 const API_BASE =
   import.meta.env.VITE_COPILOTKIT_API_URL || "http://localhost:4000";
 
-interface UseUpdateRenewalForecastOptions {
-  isAdmin: boolean;
-}
-
-export function useUpdateRenewalForecast({
-  isAdmin,
-}: UseUpdateRenewalForecastOptions) {
+export function useUpdateRenewalForecast() {
   useHumanInTheLoop({
     name: "updateRenewalForecast",
     description:
@@ -35,12 +30,7 @@ export function useUpdateRenewalForecast({
       reason: z.string().describe("Reason for the proposed change"),
     }),
     render: ({ args, respond, status }) => (
-      <ForecastCard
-        args={args}
-        respond={respond}
-        status={status}
-        isAdmin={isAdmin}
-      />
+      <ForecastCard args={args} respond={respond} status={status} />
     ),
   });
 }
@@ -57,10 +47,12 @@ interface ForecastCardProps {
   }>;
   respond: ((response: unknown) => void) | undefined;
   status: string;
-  isAdmin: boolean;
 }
 
-function ForecastCard({ args, respond, status, isAdmin }: ForecastCardProps) {
+function ForecastCard({ args, respond, status }: ForecastCardProps) {
+  const { data: identity } = useGetIdentity();
+  const isAdmin = !!(identity as { administrator?: boolean })?.administrator;
+
   const hasAutoResponded = useRef(false);
 
   // Non-admin: auto-respond after 2s delay so the user can read the proposal

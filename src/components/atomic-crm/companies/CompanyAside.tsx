@@ -17,14 +17,15 @@ import { sizes } from "./sizes";
 
 interface CompanyAsideProps {
   link?: string;
+  bare?: boolean;
 }
 
-export const CompanyAside = ({ link = "edit" }: CompanyAsideProps) => {
+export const CompanyAside = ({ link = "edit", bare }: CompanyAsideProps) => {
   const record = useRecordContext<Company>();
   if (!record) return null;
 
-  return (
-    <div className="hidden sm:block w-92 min-w-92 space-y-4">
+  const content = (
+    <div className="space-y-4">
       <div className="flex flex-row space-x-1">
         {link === "edit" ? (
           <EditButton label="Edit Company" />
@@ -51,6 +52,10 @@ export const CompanyAside = ({ link = "edit" }: CompanyAsideProps) => {
       )}
     </div>
   );
+
+  if (bare) return content;
+
+  return <div className="hidden sm:block w-92 min-w-92">{content}</div>;
 };
 
 export const CompanyInfo = ({ record }: { record: Company }) => {

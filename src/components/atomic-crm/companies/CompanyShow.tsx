@@ -1,3 +1,4 @@
+import { useCallback, useState } from "react";
 import { ReferenceManyField } from "@/components/admin/reference-many-field";
 import { SortButton } from "@/components/admin/sort-button";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CopilotWorkspace } from "../copilot/components/CopilotWorkspace";
 import { formatDistance } from "date-fns";
-import { UserPlus } from "lucide-react";
+import { Bot, Building2, FileSearch, UserPlus } from "lucide-react";
 import {
   RecordContextProvider,
   ShowBase,
@@ -20,6 +21,8 @@ import {
   useMatch,
   useNavigate,
 } from "react-router-dom";
+import { useAgent, useCopilotKit } from "@copilotkit/react-core/v2";
+import { randomUUID } from "@copilotkit/shared";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ActivityLog } from "../activity/ActivityLog";
@@ -88,6 +91,9 @@ const CompanyShowContentMobile = () => {
 
 const CompanyShowContent = () => {
   const { record, isPending } = useShowContext<Company>();
+  const { agent } = useAgent();
+  const { copilotkit } = useCopilotKit();
+  const [asideTab, setAsideTab] = useState("info");
   const navigate = useNavigate();
 
   // Get tab from URL or default to "activity"
@@ -111,6 +117,15 @@ const CompanyShowContent = () => {
           : (record ?? null),
     },
   });
+
+  const triggerAgent = useCallback(
+    async (prompt: string) => {
+      setAsideTab("copilot");
+      agent.addMessage({ id: randomUUID(), role: "user", content: prompt });
+      await copilotkit.runAgent({ agent });
+    },
+    [agent, copilotkit],
+  );
 
   const handleTabChange = (value: string) => {
     if (value === currentTab) return;
@@ -196,9 +211,54 @@ const CompanyShowContent = () => {
             </CardContent>
           </Card>
         </div>
-        <CompanyAside />
+        {/* Aside — tabbed: Company Info | Copilot */}
+        <div className="hidden sm:block w-92 min-w-92 sticky top-4 h-[calc(100vh-5rem)] flex flex-col">
+          <Tabs
+            value={asideTab}
+            onValueChange={setAsideTab}
+            className="flex flex-col h-full"
+          >
+            <TabsList className="grid w-full grid-cols-2 mb-3 flex-shrink-0">
+              <TabsTrigger value="info" className="text-xs">
+                <Building2 className="h-3.5 w-3.5 mr-1" />
+                Company
+              </TabsTrigger>
+              <TabsTrigger value="copilot" className="text-xs">
+                <Bot className="h-3.5 w-3.5 mr-1" />
+                Copilot
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="info" className="mt-0 flex-1 overflow-y-auto">
+              <CompanyAside bare />
+            </TabsContent>
+
+            <TabsContent
+              value="copilot"
+              className="mt-0 flex-1 min-h-0 flex flex-col"
+            >
+              {/* Action buttons */}
+              <div className="flex gap-1.5 flex-wrap mb-3 flex-shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs h-7"
+                  disabled={agent.isRunning}
+                  onClick={() =>
+                    triggerAgent(
+                      `Analyze the contract for ${record.name}. Show the contract risk report.`,
+                    )
+                  }
+                >
+                  <FileSearch className="h-3 w-3 mr-1" />
+                  Analyze Contract
+                </Button>
+              </div>
+              <CopilotWorkspace className="flex-1 min-h-0" />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
-      <CopilotWorkspace className="mt-4" />
     </>
   );
 };
