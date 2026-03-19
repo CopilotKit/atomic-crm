@@ -19,8 +19,8 @@ A `useReducer`-based state machine owns the demo flow. Seven states matching the
 
 | State | Route | Behavior |
 |-------|-------|----------|
-| `S0_IDLE` | `/` | Dashboard. Welcome popover, centered. |
-| `S1_OPEN_CONTACT` | `/contacts/:id/show` | Auto-navigate to Fannie Pfeffer. Highlight contact card. |
+| `S0_IDLE` | `/` | Dashboard. Welcome popover, centered (no element target — uses `driver.drive()` API). |
+| `S1_OPEN_CONTACT` | `/contacts/:id/show` | Auto-navigate to Fannie Pfeffer. Highlight contact card. User reads context, clicks "Next." |
 | `S2_AGENT_REVIEW` | same | If `autoAgent`: send review prompt. Otherwise: highlight "Review Account" button and wait. |
 | `S3_CONTRACT_ANALYSIS` | same | If `autoAgent`: send contract prompt. Otherwise: highlight "Analyze Contract" button. |
 | `S4_FORECAST_PROPOSAL` | same | If `autoAgent`: send forecast prompt. Otherwise: highlight "Forecast" button. |
@@ -30,10 +30,10 @@ A `useReducer`-based state machine owns the demo flow. Seven states matching the
 ### Transitions
 
 - `S0 → S1`: user clicks "Next"
-- `S1 → S2`: automatic after navigation completes and page renders
+- `S1 → S2`: user clicks "Next" (enabled once contact page has rendered)
 - `S2 → S3`: user clicks "Next" (enabled after agent finishes)
 - `S3 → S4`: user clicks "Next" (enabled after agent finishes)
-- `S4 → S5`: automatic when HITL card appears in DOM
+- `S4 → S5`: automatic when HITL card appears in DOM (no "Next" button shown for S4)
 - `S5 → S6`: user clicks "Next" (enabled after approve/reject)
 - `S6 → done`: user clicks "Finish"
 
@@ -43,9 +43,22 @@ Each state exposes a `canAdvance` boolean. The "Next" button in driver.js popove
 
 - **S0**: always true
 - **S1**: true when contact page has rendered (target `data-demo` element exists)
-- **S2, S3, S4**: true when `agent.isRunning` transitions from `true` to `false`
+- **S2, S3**: true when `agentPhase === 'done'` (see Agent Phase Tracking below)
+- **S4**: N/A — auto-transitions to S5 when `[data-demo="hitl-card"]` appears in DOM. No "Next" button.
 - **S5**: true after user clicks approve or reject on the HITL card
 - **S6**: always true
+
+### Agent Phase Tracking
+
+For states S2, S3, and S4 the reducer tracks an `agentPhase` sub-state:
+
+- `idle` — agent has not started (entry state)
+- `running` — `agentIsRunning` became true
+- `done` — `agentIsRunning` transitioned from true to false
+
+This prevents "Next" from being enabled before the agent has actually run. The phase resets to `idle` on each state entry. When `autoAgent=true`, the phase transitions `idle → running` immediately since the prompt is auto-sent. When `autoAgent=false`, the phase stays `idle` until the user clicks the action button (which starts the agent), then transitions `idle → running → done`.
+
+Note: `agentPhase` is tracked for S4 as well for consistency, but it is not used in S4's transition logic. The S4→S5 transition is governed solely by the DOM observer detecting `[data-demo="hitl-card"]`.
 
 ### Hook API
 
@@ -57,6 +70,7 @@ useDemoStateMachine(options: {
   agentIsRunning: boolean;
 }): {
   state: DemoState;
+  agentPhase: 'idle' | 'running' | 'done';
   canAdvance: boolean;
   advance: () => void;
   reset: () => void;
@@ -67,27 +81,44 @@ useDemoStateMachine(options: {
 
 ### Step Definitions
 
-Each state maps to a driver.js step:
+Each state maps to a driver.js step. The table below shows both `autoAgent` and manual variants:
+
+**When `autoAgent=true`:**
+
+| State | Element selector | Popover text | Popover side |
+|-------|-----------------|--------------|--------------|
+| `S0_IDLE` | none (centered modal via `driver.drive()`) | "Welcome to the Atomic CRM demo. We'll walk through an account review, contract analysis, renewal forecast, and audit trail." | — |
+| `S1_OPEN_CONTACT` | `[data-demo="contact-card"]` | "This is Fannie Pfeffer at Schmitt and Sons — a contact in renewal stage." | bottom |
+| `S2_AGENT_REVIEW` | `[data-demo="copilot-panel"]` | "The agent analyzes the account: contacts breakdown, missing signals, risk indicators, and next actions." | left |
+| `S3_CONTRACT_ANALYSIS` | `[data-demo="copilot-panel"]` | "The MCP contract analyzer scans the Schmitt and Sons MSA for risk clauses." | left |
+| `S4_FORECAST_PROPOSAL` | `[data-demo="copilot-panel"]` | "The agent proposes a renewal forecast adjustment based on risk signals." | left |
+| `S5_APPROVAL_PENDING` | `[data-demo="hitl-card"]` | "Admin approval required. Review the proposed changes and approve or reject." | left |
+| `S6_AUDIT_LOG` | `[data-demo="audit-list"]` | "Every agent action is logged. Full traceability for compliance." | top |
+
+**When `autoAgent=false` (S2/S3/S4 differ):**
 
 | State | Element selector | Popover text |
 |-------|-----------------|--------------|
-| `S0_IDLE` | none (centered) | "Welcome to the Atomic CRM demo. We'll walk through an account review, contract analysis, renewal forecast, and audit trail." |
-| `S1_OPEN_CONTACT` | `[data-demo="contact-card"]` | "This is Fannie Pfeffer at Schmitt and Sons — a contact in renewal stage." |
-| `S2_AGENT_REVIEW` | `[data-demo="copilot-panel"]` | "The agent analyzes the account: contacts breakdown, missing signals, risk indicators, and next actions." |
-| `S3_CONTRACT_ANALYSIS` | `[data-demo="copilot-panel"]` | "The MCP contract analyzer scans the Schmitt and Sons MSA for risk clauses." |
-| `S4_FORECAST_PROPOSAL` | `[data-demo="copilot-panel"]` | "The agent proposes a renewal forecast adjustment based on risk signals." |
-| `S5_APPROVAL_PENDING` | `[data-demo="hitl-card"]` | "Admin approval required. Review the proposed changes and approve or reject." |
-| `S6_AUDIT_LOG` | `[data-demo="audit-list"]` | "Every agent action is logged. Full traceability for compliance." |
+| `S2_AGENT_REVIEW` | `[data-demo="review-btn"]` | "Click 'Review Account' to have the agent analyze this account." |
+| `S3_CONTRACT_ANALYSIS` | `[data-demo="contract-btn"]` | "Click 'Analyze Contract' to scan the Schmitt and Sons MSA." |
+| `S4_FORECAST_PROPOSAL` | `[data-demo="forecast-btn"]` | "Click 'Forecast' to propose a renewal adjustment." |
 
-When `autoAgent` is false, S2/S3/S4 highlight the action button (`[data-demo="review-btn"]`, etc.) with text "Click the highlighted button to continue."
+Once the agent finishes in non-autoAgent mode, the popover target switches to `[data-demo="copilot-panel"]` with the autoAgent text, and "Next" is enabled.
 
 ### Driver.js Configuration
 
 - `allowClose: false`
 - `overlayClickNext: false`
+- `allowKeyboardControl: false` — prevents accidental advances via Enter/arrow keys
 - Custom popover buttons: "Next" (calls `advance()`) and "Exit Demo" (calls `reset()`)
 - "Next" button disabled when `!canAdvance`
-- `onPopoverRender` callback updates button disabled state reactively
+- S4 popover has no "Next" button (auto-transitions to S5)
+- `onPopoverRender` callback updates button disabled state reactively and manages Retry/Skip buttons on error (see Edge Cases)
+
+### Driver.js API Usage
+
+- **S0 (no element target):** Use `driver.drive()` with a single step that has no `element` property, producing a centered modal popover.
+- **S1–S6 (element targets):** Use `driver.highlight({ element, popover })` to spotlight individual elements.
 
 ### Sync Strategy
 
@@ -96,7 +127,7 @@ The state machine is the source of truth. Flow:
 1. `advance()` transitions the state machine
 2. State machine triggers navigation if the new state is on a different route
 3. `useDemoDriver` polls for the target `data-demo` element via `requestAnimationFrame` + `document.querySelector` (capped at 5 seconds)
-4. Once found, calls `driver.highlight()` on that element
+4. Once found, calls `driver.highlight()` on that element (or `driver.drive()` for S0)
 
 ## Auto-Agent Triggering
 
@@ -108,9 +139,31 @@ When `autoAgent=true`, on entry to states S2, S3, S4 the state machine calls `tr
 
 These are the same prompts the existing action buttons use in `ContactShowContent`.
 
-The `triggerAgent` function (already in ContactShow.tsx) switches the aside tab to "copilot" and calls `agent.addMessage()` + `copilotkit.runAgent()`.
+### triggerAgent Ownership
 
-When `autoAgent=false`, the driver.js popover tells the user to click the highlighted button. The state machine detects `agent.isRunning` becoming true (user clicked) then waits for false (agent done) before enabling "Next."
+`DemoProvider` calls `useAgent()` and `useCopilotKit()` directly (both are available since `CopilotProvider` wraps the entire app in `App.tsx`). It builds its own `triggerAgent` function using `agent.addMessage()` + `copilotkit.runAgent()`. It passes `agent.isRunning` from the `useAgent()` hook as the `agentIsRunning` input to the state machine.
+
+The aside tab ("info" vs "copilot") currently lives as local state in `ContactShowContent`. For the demo to switch to the copilot tab, this state must be lifted: `DemoContext` exposes a `requestCopilotTab` flag, and `ContactShowContent` subscribes to it via `useContext` to set its local tab state. This is a minimal lift — the tab state itself stays local, but the demo can request it to switch.
+
+When `autoAgent=false`, the driver.js popover tells the user to click the highlighted button. The state machine detects `agentPhase` transitioning from `idle → running → done` before enabling "Next."
+
+### Agent Context Dependency
+
+`triggerAgent` must only be called AFTER the contact page has mounted and `useCopilotSetup()` has run (which sets the agent context with the current contact record). The state machine enforces this: agent prompts are only sent in S2/S3/S4, which are only reachable after S1 completes (contact page rendered and `data-demo` element present). By the time S2 fires, `useCopilotSetup` has already run.
+
+## Initialization Sequence
+
+On mount, `DemoProvider`:
+
+1. Reads `?demo=guided` and `?autoAgent=true` from URL search params
+2. If `isDemoMode` is false, renders children with a no-op context (zero overhead)
+3. If `isDemoMode` is true:
+   a. Resolves Fannie Pfeffer's contact ID via `dataProvider.getList` (see Contact Resolution below)
+   b. If not on `/`, navigates to `/` first
+   c. Transitions to `S0_IDLE` and shows the welcome popover
+4. The driver.js instance is created lazily on first state entry
+
+If the user manually navigates to a URL with `?demo=guided` while mid-app, the demo resets to S0 and navigates to `/`.
 
 ## Contact Resolution
 
@@ -137,11 +190,11 @@ src/components/atomic-crm/demo/
 
 | File | Change |
 |------|--------|
-| `src/components/atomic-crm/root/CRM.tsx` | Wrap `DesktopAdmin` with `<DemoProvider>` |
-| `src/components/atomic-crm/contacts/ContactShow.tsx` | Add `data-demo` attributes to contact card, copilot panel, action buttons |
+| `src/components/atomic-crm/layout/Layout.tsx` | Wrap layout children with `<DemoProvider>`. This places it INSIDE the Router (created by `<Admin>`) so `useNavigate()` is available, and INSIDE `CopilotProvider` so `useAgent()`/`useCopilotKit()` are available. |
+| `src/components/atomic-crm/contacts/ContactShow.tsx` | Add `data-demo` attributes to contact card, copilot panel, action buttons. Subscribe to `DemoContext.requestCopilotTab` to auto-switch aside tab. |
 | `src/components/atomic-crm/copilot/tools/useUpdateRenewalForecast.tsx` | Add `data-demo="hitl-card"` to approval card |
 | `src/components/atomic-crm/audit/AuditLogPage.tsx` | Add `data-demo="audit-list"` to event list |
-| `package.json` | Add `driver.js` dependency |
+| `package.json` | Add `driver.js` dependency (`^1.3.1` — v1.x API; v2 has a different API) |
 
 ## Data Attributes
 
@@ -178,9 +231,19 @@ The HITL approval card is rendered asynchronously by the agent's tool call. Stat
 2. Destroys the driver.js instance
 3. Navigates to `/`
 
+### Conditional Buttons (Contract, Forecast)
+
+The "Analyze Contract" button requires `companyName` to be truthy. The "Forecast" button requires `enriched?.renewal_amount != null` (depends on enrichment API server running). The hardcoded demo contact (Fannie Pfeffer at Schmitt and Sons) must have a `company_id` set and renewal data in the enrichment store.
+
+If `[data-demo="contract-btn"]` or `[data-demo="forecast-btn"]` is not found within the 5-second polling window, the state machine skips that step with a brief "Skipped — button not available" note in the popover and advances to the next state.
+
 ### Missing Demo Data
 
 If the Fannie Pfeffer contact is not found in the data provider, show an error popover and exit. No partial demo.
+
+### Retry/Skip Buttons on Error
+
+When an agent error occurs, `onPopoverRender` injects a "Retry" button into the driver.js popover DOM. The reducer tracks `errorCount` per state. After 2 failures, "Retry" is replaced with "Skip." Both buttons are rendered by manipulating the popover footer via `onPopoverRender`.
 
 ## Out of Scope
 
