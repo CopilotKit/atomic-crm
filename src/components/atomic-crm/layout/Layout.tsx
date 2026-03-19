@@ -6,11 +6,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { useConfigurationLoader } from "../root/useConfigurationLoader";
 import Header from "./Header";
+import { DemoProvider } from "../demo/DemoProvider";
 
 export const Layout = ({ children }: { children: ReactNode }) => {
   useConfigurationLoader();
   return (
-    <>
+    <DemoProvider>
       <Header />
       <main className="max-w-screen-xl mx-auto pt-4 px-4" id="main-content">
         <ErrorBoundary FallbackComponent={Error}>
@@ -20,6 +21,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         </ErrorBoundary>
       </main>
       <Notification />
-    </>
+    </DemoProvider>
   );
 };
