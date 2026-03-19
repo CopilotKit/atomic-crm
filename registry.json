@@ -522,6 +522,30 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/demo/useDemoStateMachine.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/demo/useDemoDriver.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/demo/demoSteps.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/demo/demoConfig.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/demo/DemoProvider.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/demo/DemoContext.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/deals/stages.ts",
           "type": "registry:component"
         },
