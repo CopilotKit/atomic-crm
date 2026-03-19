@@ -82,7 +82,7 @@ function ForecastCard({ args, respond, status, isAdmin }: ForecastCardProps) {
   const isExecuting = !!respond;
 
   return (
-    <Card className="my-2">
+    <Card className="my-2" data-demo="hitl-card">
       <CardContent className="pt-4">
         <div className="mb-3">
           <p className="font-semibold text-sm mb-1">
@@ -147,7 +147,6 @@ function ForecastCard({ args, respond, status, isAdmin }: ForecastCardProps) {
             Only admins can approve forecast changes.
           </p>
         )}
-
       </CardContent>
     </Card>
   );

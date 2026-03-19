@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { RecordRepresentation, ShowBase, useShowContext } from "ra-core";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ReferenceField } from "@/components/admin/reference-field";
@@ -31,6 +31,7 @@ import { MobileBackButton } from "../misc/MobileBackButton";
 import { useCopilotSetup } from "../copilot/hooks/useCopilotSetup";
 import { useContactEnrichment } from "../copilot/useContactEnrichment";
 import { CopilotWorkspace } from "../copilot/components/CopilotWorkspace";
+import { useDemoContext } from "../demo/DemoContext";
 
 export const ContactShow = () => {
   const isMobile = useIsMobile();
@@ -208,6 +209,13 @@ const ContactShowContent = () => {
   const { agent } = useAgent();
   const { copilotkit } = useCopilotKit();
   const [asideTab, setAsideTab] = useState("info");
+  const { requestCopilotTab } = useDemoContext();
+
+  useEffect(() => {
+    if (requestCopilotTab) {
+      setAsideTab("copilot");
+    }
+  }, [requestCopilotTab]);
 
   // Enrichment and copilot setup — must be BEFORE any early return
   const { data: enriched } = useContactEnrichment(
@@ -241,7 +249,7 @@ const ContactShowContent = () => {
       <div className="mt-2 mb-2 flex gap-8">
         {/* Main content — contact card + notes */}
         <div className="flex-1">
-          <Card>
+          <Card data-demo="contact-card">
             <CardContent>
               <div className="flex">
                 <Avatar />
@@ -324,6 +332,7 @@ const ContactShowContent = () => {
             <TabsContent
               value="copilot"
               className="mt-0 flex-1 min-h-0 flex flex-col"
+              data-demo="copilot-panel"
             >
               {/* Action buttons — pinned top, disabled while agent runs */}
               <div className="flex gap-1.5 flex-wrap mb-3 flex-shrink-0">
@@ -332,6 +341,7 @@ const ContactShowContent = () => {
                   size="sm"
                   className="text-xs h-7"
                   disabled={agent.isRunning}
+                  data-demo="review-btn"
                   onClick={() =>
                     triggerAgent(
                       `Review the account for ${record.first_name} ${record.last_name} at ${companyName}. Show account summary, missing signals, risk indicators, and next actions.`,
@@ -347,6 +357,7 @@ const ContactShowContent = () => {
                     size="sm"
                     className="text-xs h-7"
                     disabled={agent.isRunning}
+                    data-demo="contract-btn"
                     onClick={() =>
                       triggerAgent(
                         `Analyze the contract for ${companyName}. Show the contract risk report.`,
@@ -363,6 +374,7 @@ const ContactShowContent = () => {
                     size="sm"
                     className="text-xs h-7"
                     disabled={agent.isRunning}
+                    data-demo="forecast-btn"
                     onClick={() =>
                       triggerAgent(
                         `Review the renewal forecast for ${record.first_name} ${record.last_name} and propose an adjustment if warranted.`,

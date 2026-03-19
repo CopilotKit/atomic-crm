@@ -60,7 +60,7 @@ export const AuditLogPage = () => {
   }, []);
 
   return (
-    <div className="max-w-3xl mx-auto mt-8 px-4">
+    <div className="max-w-3xl mx-auto mt-8 px-4" data-demo="audit-list">
       <h2 className="text-2xl font-semibold mb-4">Audit Log</h2>
       {events.length === 0 ? (
         <Card>
