@@ -2,11 +2,28 @@ import {
   CopilotChat,
   CopilotChatToolCallsView,
 } from "@copilotkit/react-core/v2";
-import { Bot, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 // ─── Null slot: disables a v2 CopilotChat sub-component ─────────────────────
 
 const NullSlot = () => null;
+
+function CopilotKiteIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 55 60"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3.3"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M0 21.93L16.54 0C40.85 5.37 53 8.06 53 8.06L43.12 56L0 21.93Z" />
+      <line x1="16.58" y1="0" x2="43.25" y2="56" />
+      <line x1="0" y1="21.93" x2="53" y2="8.48" />
+    </svg>
+  );
+}
 
 // ─── v2 AssistantMessage ─────────────────────────────────────────────────────
 
@@ -53,7 +70,7 @@ function WorkspaceAssistantMessage({
 
       {textContent && (
         <div className="flex items-start gap-2">
-          <Bot className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+          <CopilotKiteIcon className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
           <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">
             {textContent}
             {isRunning && isLatest && (
