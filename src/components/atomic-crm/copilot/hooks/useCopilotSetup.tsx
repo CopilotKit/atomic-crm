@@ -23,7 +23,7 @@ interface CopilotSetupOptions {
 
 export function useCopilotSetup({ context }: CopilotSetupOptions) {
   // Detect user role
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity({ staleTime: 0 });
   const isAdmin = !!(identity as { administrator?: boolean })?.administrator;
 
   // Share app state with agent, including role

@@ -50,7 +50,7 @@ interface ForecastCardProps {
 }
 
 function ForecastCard({ args, respond, status }: ForecastCardProps) {
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity({ staleTime: 0 });
   const isAdmin = !!(identity as { administrator?: boolean })?.administrator;
 
   const hasAutoResponded = useRef(false);
