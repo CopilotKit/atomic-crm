@@ -18,7 +18,7 @@ import { DEMO_CONTACT, DEMO_PROMPTS } from "./demoConfig";
 export function DemoProvider({ children }: { children: ReactNode }) {
   // Read from window.location directly — ra-core's router strips query params
   // from useSearchParams, but the URL still has them.
-  const [isDemoMode] = useState(
+  const [isDemoMode, setIsDemoMode] = useState(
     () => new URLSearchParams(window.location.search).get("demo") === "guided",
   );
   const [autoAgent] = useState(
@@ -32,7 +32,12 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <DemoActiveProvider autoAgent={autoAgent}>{children}</DemoActiveProvider>
+    <DemoActiveProvider
+      autoAgent={autoAgent}
+      onExit={() => setIsDemoMode(false)}
+    >
+      {children}
+    </DemoActiveProvider>
   );
 }
 
@@ -59,10 +64,15 @@ function DemoInactiveProvider({ children }: { children: ReactNode }) {
 
 interface DemoActiveProviderProps {
   autoAgent: boolean;
+  onExit: () => void;
   children: ReactNode;
 }
 
-function DemoActiveProvider({ autoAgent, children }: DemoActiveProviderProps) {
+function DemoActiveProvider({
+  autoAgent,
+  onExit,
+  children,
+}: DemoActiveProviderProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const dataProvider = useDataProvider();
@@ -120,8 +130,8 @@ function DemoActiveProvider({ autoAgent, children }: DemoActiveProviderProps) {
     url.searchParams.delete("demo");
     url.searchParams.delete("autoAgent");
     window.history.replaceState({}, "", url.pathname + url.search);
-    navigate("/");
-  }, [machine.reset, navigate]);
+    onExit();
+  }, [machine.reset, onExit]);
 
   // Track agent.isRunning transitions → dispatch agentPhase changes.
   // This handles both autoAgent mode (where we trigger the agent) and manual
