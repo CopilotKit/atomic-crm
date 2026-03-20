@@ -13,19 +13,27 @@ import { useDataProvider } from "ra-core";
 import { DemoContext, type DemoContextValue } from "./DemoContext";
 import { useDemoStateMachine } from "./useDemoStateMachine";
 import { useDemoDriver } from "./useDemoDriver";
-import { DEMO_CONTACT, DEMO_PROMPTS } from "./demoConfig";
+import { useAutoAdvance } from "./useAutoAdvance";
+import { DEMO_CONTACT, DEMO_PROMPTS, type DemoMode } from "./demoConfig";
 
 export function DemoProvider({ children }: { children: ReactNode }) {
   // Read from window.location directly — ra-core's router strips query params
   // from useSearchParams, but the URL still has them.
-  const [isDemoMode, setIsDemoMode] = useState(
-    () => new URLSearchParams(window.location.search).get("demo") === "guided",
-  );
-  const [autoAgent] = useState(
-    () =>
-      isDemoMode &&
-      new URLSearchParams(window.location.search).get("autoAgent") === "true",
-  );
+  const [mode, setMode] = useState<DemoMode | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const demo = params.get("demo");
+    if (demo === "guided") return "guided";
+    if (demo === "autoplay") return "autoplay";
+    if (demo === "kiosk") return "kiosk";
+    return null;
+  });
+
+  const isDemoMode = mode !== null;
+  const autoAgent =
+    mode === "autoplay" ||
+    mode === "kiosk" ||
+    (mode === "guided" &&
+      new URLSearchParams(window.location.search).get("autoAgent") === "true");
 
   if (!isDemoMode) {
     return <DemoInactiveProvider>{children}</DemoInactiveProvider>;
@@ -33,8 +41,9 @@ export function DemoProvider({ children }: { children: ReactNode }) {
 
   return (
     <DemoActiveProvider
+      mode={mode!}
       autoAgent={autoAgent}
-      onExit={() => setIsDemoMode(false)}
+      onExit={() => setMode(null)}
     >
       {children}
     </DemoActiveProvider>
@@ -46,6 +55,7 @@ function DemoInactiveProvider({ children }: { children: ReactNode }) {
   const value = useMemo<DemoContextValue>(
     () => ({
       isDemoMode: false,
+      mode: null,
       autoAgent: false,
       state: "S0_IDLE",
       agentPhase: "idle",
@@ -63,12 +73,14 @@ function DemoInactiveProvider({ children }: { children: ReactNode }) {
 }
 
 interface DemoActiveProviderProps {
+  mode: DemoMode;
   autoAgent: boolean;
   onExit: () => void;
   children: ReactNode;
 }
 
 function DemoActiveProvider({
+  mode,
   autoAgent,
   onExit,
   children,
@@ -165,6 +177,7 @@ function DemoActiveProvider({
   ]);
 
   useDemoDriver({
+    mode,
     state: machine.machineState.state,
     agentPhase: machine.machineState.agentPhase,
     canAdvance: machine.canAdvance,
@@ -177,6 +190,15 @@ function DemoActiveProvider({
     setElementReady: machine.setElementReady,
   });
 
+  useAutoAdvance({
+    enabled: mode === "autoplay" || mode === "kiosk",
+    state: machine.machineState.state,
+    agentPhase: machine.machineState.agentPhase,
+    canAdvance: machine.canAdvance,
+    advance: machine.advance,
+    restart: machine.restart,
+  });
+
   // On state entry: navigate and/or auto-trigger agent
   const prevStateRef = useRef(machine.machineState.state);
   useEffect(() => {
@@ -185,11 +207,15 @@ function DemoActiveProvider({
     prevStateRef.current = currentState;
 
     // Navigate based on state
-    if (currentState === "S1_OPEN_CONTACT" && contactRoute) {
+    const isAutoplay = mode === "autoplay" || mode === "kiosk";
+    if (currentState === "S0_IDLE" && isAutoplay) {
+      // Restarted loop — navigate to dashboard
+      navigate("/");
+    } else if (currentState === "S1_OPEN_CONTACT" && contactRoute) {
       navigate(contactRoute);
     } else if (currentState === "S6_AUDIT_LOG") {
       navigate("/audit");
-    } else if (currentState === "DONE") {
+    } else if (currentState === "DONE" && !isAutoplay) {
       navigate("/");
     }
 
@@ -233,6 +259,7 @@ function DemoActiveProvider({
   const value = useMemo<DemoContextValue>(
     () => ({
       isDemoMode: true,
+      mode,
       autoAgent,
       state: machine.machineState.state,
       agentPhase: machine.machineState.agentPhase,
@@ -245,6 +272,7 @@ function DemoActiveProvider({
       requestCopilotTab,
     }),
     [
+      mode,
       autoAgent,
       machine.machineState.state,
       machine.machineState.agentPhase,

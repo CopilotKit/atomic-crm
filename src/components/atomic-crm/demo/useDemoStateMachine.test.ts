@@ -103,6 +103,23 @@ describe("demoReducer", () => {
     expect(next.errorCount).toBe(0);
     expect(next.agentPhase).toBe("idle");
   });
+
+  it("RESTART from DONE returns to S0_IDLE", () => {
+    const done: DemoMachineState = { ...initialState, state: "DONE" };
+    const next = demoReducer(done, { type: "RESTART" });
+    expect(next).toEqual(initialState);
+  });
+
+  it("RESTART from any state returns to S0_IDLE", () => {
+    const s3: DemoMachineState = {
+      ...initialState,
+      state: "S3_CONTRACT_ANALYSIS",
+      agentPhase: "done",
+      errorCount: 1,
+    };
+    const next = demoReducer(s3, { type: "RESTART" });
+    expect(next).toEqual(initialState);
+  });
 });
 
 describe("computeCanAdvance", () => {

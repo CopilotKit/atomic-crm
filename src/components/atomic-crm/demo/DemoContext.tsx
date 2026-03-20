@@ -1,8 +1,10 @@
 import { createContext, useContext } from "react";
 import type { DemoStateOrDone, AgentPhase } from "./useDemoStateMachine";
+import type { DemoMode } from "./demoConfig";
 
 export interface DemoContextValue {
   isDemoMode: boolean;
+  mode: DemoMode | null;
   autoAgent: boolean;
   state: DemoStateOrDone;
   agentPhase: AgentPhase;
@@ -18,6 +20,7 @@ export interface DemoContextValue {
 
 const defaultValue: DemoContextValue = {
   isDemoMode: false,
+  mode: null,
   autoAgent: false,
   state: "S0_IDLE",
   agentPhase: "idle",

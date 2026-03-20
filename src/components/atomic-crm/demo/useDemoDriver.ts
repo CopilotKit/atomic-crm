@@ -7,6 +7,7 @@ import {
   DOM_POLL_TIMEOUT_MS,
   DOM_POLL_INTERVAL_MS,
   MAX_AGENT_RETRIES,
+  type DemoMode,
 } from "./demoConfig";
 
 /**
@@ -39,6 +40,7 @@ export function waitForElement(
 }
 
 interface UseDemoDriverOptions {
+  mode: DemoMode | null;
   state: DemoStateOrDone;
   agentPhase: AgentPhase;
   canAdvance: boolean;
@@ -52,6 +54,7 @@ interface UseDemoDriverOptions {
 }
 
 export function useDemoDriver({
+  mode,
   state,
   agentPhase,
   canAdvance,
@@ -63,6 +66,7 @@ export function useDemoDriver({
   reportError,
   setElementReady,
 }: UseDemoDriverOptions) {
+  const skipDriver = mode === "kiosk";
   const driverRef = useRef<Driver | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -81,8 +85,9 @@ export function useDemoDriver({
   const errorCountRef = useRef(errorCount);
   errorCountRef.current = errorCount;
 
-  // Create driver instance once
+  // Create driver instance once (skip in kiosk mode)
   useEffect(() => {
+    if (skipDriver) return;
     driverRef.current = createDriver({
       allowClose: false,
       overlayClickBehavior: "close",
@@ -95,7 +100,7 @@ export function useDemoDriver({
       driverRef.current?.destroy();
       driverRef.current = null;
     };
-  }, []);
+  }, [skipDriver]);
 
   const steps = useMemo(() => getDemoSteps(autoAgent), [autoAgent]);
   const autoAgentSteps = useMemo(() => getDemoSteps(true), []);
@@ -151,10 +156,15 @@ export function useDemoDriver({
     [steps, setElementReady],
   );
 
-  // React to state changes
+  // React to state changes (skip in kiosk mode — but still set elementReady)
   useEffect(() => {
+    if (skipDriver) {
+      // In kiosk mode, immediately mark element as ready so autoAdvance works
+      setElementReady(true);
+      return;
+    }
     highlightState(state);
-  }, [state, highlightState]);
+  }, [state, highlightState, skipDriver, setElementReady]);
 
   // S4 auto-transition: poll for HITL card
   useEffect(() => {
@@ -174,7 +184,7 @@ export function useDemoDriver({
 
   // Re-target popover when agent finishes in non-autoAgent mode (S2/S3)
   useEffect(() => {
-    if (autoAgent) return;
+    if (skipDriver || autoAgent) return;
     if (agentPhase !== "done") return;
     const agentStates = ["S2_AGENT_REVIEW", "S3_CONTRACT_ANALYSIS"];
     if (!agentStates.includes(state as string)) return;
@@ -183,10 +193,18 @@ export function useDemoDriver({
     if (autoStep) {
       highlightState(state, autoStep);
     }
-  }, [state, agentPhase, autoAgent, autoAgentSteps, highlightState]);
+  }, [
+    state,
+    agentPhase,
+    autoAgent,
+    skipDriver,
+    autoAgentSteps,
+    highlightState,
+  ]);
 
   // Update button disabled states and retry/skip
   useEffect(() => {
+    if (skipDriver) return;
     const wrapper = document.querySelector(".driver-popover");
     if (!wrapper) return;
 

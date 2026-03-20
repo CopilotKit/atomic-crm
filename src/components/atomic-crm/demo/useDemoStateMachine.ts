@@ -17,6 +17,7 @@ export interface DemoMachineState {
 export type DemoAction =
   | { type: "ADVANCE" }
   | { type: "RESET" }
+  | { type: "RESTART" }
   | { type: "AGENT_STARTED" }
   | { type: "AGENT_FINISHED" }
   | { type: "AGENT_ERROR" }
@@ -70,6 +71,7 @@ export function demoReducer(
     }
 
     case "RESET":
+    case "RESTART":
       return initialState;
 
     case "AGENT_STARTED":
@@ -165,6 +167,11 @@ export function useDemoStateMachine() {
     setElementReady(false);
   }, []);
 
+  const restart = useCallback(() => {
+    dispatch({ type: "RESTART" });
+    setElementReady(false);
+  }, []);
+
   return {
     machineState,
     dispatch,
@@ -173,6 +180,7 @@ export function useDemoStateMachine() {
     setElementReady,
     advance,
     reset,
+    restart,
     skipState,
   };
 }
