@@ -10,7 +10,7 @@
           },
           {
             "name": "LeadPriorityList",
-            "arguments": "{\"leads\":[{\"name\":\"Suzanne Bode\",\"score\":92,\"lifecycleStage\":\"Qualified\",\"lastActivity\":\"2026-03-15\"},{\"name\":\"Margaret Haley\",\"score\":74,\"lifecycleStage\":\"Prospect\",\"lastActivity\":\"2026-03-10\"},{\"name\":\"Ray Weber\",\"score\":71,\"lifecycleStage\":\"Qualified\",\"lastActivity\":\"2026-03-12\"}]}"
+            "arguments": "{\"leads\":[{\"name\":\"Suzanne Bode\",\"contactId\":1,\"score\":92,\"lifecycleStage\":\"Qualified\",\"lastActivity\":\"2026-03-15\"},{\"name\":\"Margaret Haley\",\"contactId\":2,\"score\":74,\"lifecycleStage\":\"Prospect\",\"lastActivity\":\"2026-03-10\"},{\"name\":\"Ray Weber\",\"contactId\":3,\"score\":71,\"lifecycleStage\":\"Qualified\",\"lastActivity\":\"2026-03-12\"}]}"
           }
         ]
       }

@@ -273,11 +273,12 @@ export function useRegisterComponents() {
   useComponent({
     name: "LeadPriorityList",
     description:
-      "Display a prioritized list of leads with scores and lifecycle stages. Use for lead triage workflows.",
+      "Display a prioritized list of leads with scores and lifecycle stages. Use for lead triage workflows. Always include contactId (the contact's id) so leads link to their detail page.",
     parameters: z.object({
       leads: z.array(
         z.object({
           name: z.string(),
+          contactId: z.number().optional(),
           score: z.number(),
           lifecycleStage: z.string(),
           lastActivity: z.string(),
