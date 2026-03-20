@@ -18,8 +18,6 @@ export const DEFAULT_USER = {
 
 export const USER_STORAGE_KEY = "user";
 
-localStorage.setItem(USER_STORAGE_KEY, JSON.stringify({ ...DEFAULT_USER }));
-
 async function getUser(email: string) {
   const sales = await dataProvider.getList("sales", {
     pagination: { page: 1, perPage: 200 },

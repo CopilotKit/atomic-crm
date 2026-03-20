@@ -141,6 +141,9 @@ export const LoginPage = (props: { redirectTo?: string }) => {
                 Forgot your password?
               </Link>
             )}
+            {import.meta.env.VITE_IS_DEMO === "true" && (
+              <DemoCredentials onSelect={handleSubmit} />
+            )}
           </div>
         </div>
       </div>
@@ -148,3 +151,45 @@ export const LoginPage = (props: { redirectTo?: string }) => {
     </div>
   );
 };
+
+const DEMO_USERS = [
+  {
+    email: "janedoe@atomic.dev",
+    password: "demo",
+    label: "Jane Doe",
+    role: "User",
+  },
+  {
+    email: "johndoe@atomic.dev",
+    password: "demo",
+    label: "John Doe",
+    role: "Admin",
+  },
+];
+
+function DemoCredentials({
+  onSelect,
+}: {
+  onSelect: (values: { email: string; password: string }) => void;
+}) {
+  return (
+    <div className="rounded-md border p-4 space-y-2">
+      <p className="text-sm font-medium">Demo accounts</p>
+      {DEMO_USERS.map((user) => (
+        <button
+          key={user.email}
+          type="button"
+          className="flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm hover:bg-muted cursor-pointer"
+          onClick={() =>
+            onSelect({ email: user.email, password: user.password })
+          }
+        >
+          <span>
+            {user.label} — {user.email}
+          </span>
+          <span className="text-xs text-muted-foreground">{user.role}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
