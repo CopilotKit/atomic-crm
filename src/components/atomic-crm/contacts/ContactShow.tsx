@@ -31,6 +31,7 @@ import { MobileBackButton } from "../misc/MobileBackButton";
 import { useCopilotSetup } from "../copilot/hooks/useCopilotSetup";
 import { useContactEnrichment } from "../copilot/useContactEnrichment";
 import { CopilotWorkspace } from "../copilot/components/CopilotWorkspace";
+import { useCopilotOverlay } from "../copilot/CopilotOverlayContext";
 import { useDemoContext } from "../demo/DemoContext";
 
 export const ContactShow = () => {
@@ -216,6 +217,12 @@ const ContactShowContent = () => {
       setAsideTab("copilot");
     }
   }, [requestCopilotTab]);
+
+  const { registerPage } = useCopilotOverlay();
+
+  useEffect(() => {
+    return registerPage(() => setAsideTab("copilot"));
+  }, [registerPage]);
 
   // Enrichment and copilot setup — must be BEFORE any early return
   const { data: enriched } = useContactEnrichment(

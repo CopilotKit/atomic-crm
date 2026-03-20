@@ -8,6 +8,7 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 import { useConfigurationContext } from "../root/ConfigurationContext";
 import { ImportPage } from "../misc/ImportPage";
+import { CopilotButton } from "../copilot/CopilotButton";
 import { PersonaSelector } from "../copilot/PersonaSelector";
 
 const Header = () => {
@@ -82,6 +83,7 @@ const Header = () => {
               </div>
               <div className="flex items-center">
                 <PersonaSelector />
+                <CopilotButton />
                 <ThemeModeToggle />
                 <RefreshButton />
                 <UserMenu>

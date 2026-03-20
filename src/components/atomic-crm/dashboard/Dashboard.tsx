@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useGetList } from "ra-core";
 import { useAgent, useCopilotKit } from "@copilotkit/react-core/v2";
 import { randomUUID } from "@copilotkit/shared";
@@ -8,6 +8,7 @@ import { Bot, ClipboardList, Users } from "lucide-react";
 
 import type { Contact, ContactNote } from "../types";
 import { CopilotWorkspace } from "../copilot/components/CopilotWorkspace";
+import { useCopilotOverlay } from "../copilot/CopilotOverlayContext";
 import { useCopilotSetup } from "../copilot/hooks/useCopilotSetup";
 import { DashboardActivityLog } from "./DashboardActivityLog";
 import { DashboardStepper } from "./DashboardStepper";
@@ -27,6 +28,12 @@ export const Dashboard = () => {
       value: null,
     },
   });
+
+  const { registerPage } = useCopilotOverlay();
+
+  useEffect(() => {
+    return registerPage(() => setRightTab("copilot"));
+  }, [registerPage]);
 
   const triggerAgent = useCallback(
     async (prompt: string) => {

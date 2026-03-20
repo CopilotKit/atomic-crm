@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ReferenceManyField } from "@/components/admin/reference-many-field";
 import { SortButton } from "@/components/admin/sort-button";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ActivityLog } from "../activity/ActivityLog";
 import { Avatar } from "../contacts/Avatar";
 import { TagsList } from "../contacts/TagsList";
+import { useCopilotOverlay } from "../copilot/CopilotOverlayContext";
 import { useCopilotSetup } from "../copilot/hooks/useCopilotSetup";
 import { useCompanyEnrichment } from "../copilot/useCompanyEnrichment";
 import { findDealLabel } from "../deals/deal";
@@ -117,6 +118,12 @@ const CompanyShowContent = () => {
           : (record ?? null),
     },
   });
+
+  const { registerPage } = useCopilotOverlay();
+
+  useEffect(() => {
+    return registerPage(() => setAsideTab("copilot"));
+  }, [registerPage]);
 
   const triggerAgent = useCallback(
     async (prompt: string) => {
