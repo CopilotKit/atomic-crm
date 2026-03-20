@@ -530,6 +530,10 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/demo/useAutoAdvance.ts",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/demo/demoSteps.ts",
           "type": "registry:component"
         },
@@ -658,6 +662,14 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/copilot/PersonaSelector.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/PersonaProvider.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/copilot/CopilotProvider.tsx",
           "type": "registry:component"
         },
@@ -703,6 +715,10 @@
         },
         {
           "path": "src/components/atomic-crm/copilot/hooks/useRegisterComponents.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/hooks/usePersona.ts",
           "type": "registry:component"
         },
         {

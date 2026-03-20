@@ -182,65 +182,26 @@ input[type="time"] {
 }
 
 /* ── Copilot Workspace ──
-   Strip CopilotChat chrome so it blends into the surrounding card. */
+   Minimal overrides for v2 CopilotChat to blend into surrounding UI.
+   The v2 layout (StickToBottom scroll, absolute input) is preserved;
+   feather gradient & scroll-to-bottom button are disabled via slot props
+   in CopilotWorkspace.tsx. */
 
-/* CopilotChat outer container: flex column, fills parent */
-.copilot-workspace-chat .copilot-chat-inline {
+/* The wrapper establishes a positioning context so the chat can fill it
+   with absolute positioning — this guarantees a definite height for
+   StickToBottom's scroll container regardless of the h-full chain. */
+.copilot-workspace-chat {
+  position: relative;
+}
+
+/* Fill wrapper and strip CopilotChat visual chrome */
+.copilot-workspace-chat .copilotKitChat {
+  position: absolute !important;
+  inset: 0 !important;
   border: none !important;
   background: transparent !important;
   box-shadow: none !important;
   border-radius: 0 !important;
-  height: 100% !important;
-  max-height: none !important;
-  min-height: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-/* Messages area: scrollable, takes remaining space */
-.copilot-workspace-chat .copilotKitMessages,
-.copilot-workspace-chat [class*="copilotKitMessages"] {
-  flex: 1 !important;
-  min-height: 0 !important;
-  overflow-y: auto !important;
-  padding: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-/* Override CopilotChat's dynamic paddingBottom on scroll view wrapper.
-   CopilotChat adds large paddingBottom for input overlay positioning,
-   but we use flex layout with input below the scroll area instead. */
-.copilot-workspace-chat [style*="padding-bottom"] {
-  padding-bottom: 0 !important;
-}
-
-/* Strip message bubble backgrounds */
-.copilot-workspace-chat .copilotKitMessage,
-.copilot-workspace-chat [class*="copilotKitMessage"] {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  max-width: 100% !important;
-}
-
-/* Hide default message controls (copy, regenerate, thumbs) */
-.copilot-workspace-chat .copilotKitMessageControls,
-.copilot-workspace-chat [class*="copilotKitMessageControl"] {
-  display: none !important;
-}
-
-/* Hide header/footer chrome */
-.copilot-workspace-chat [class*="copilotKitHeader"],
-.copilot-workspace-chat [class*="copilotKitFooter"] {
-  display: none !important;
-}
-
-/* Force input container out of absolute positioning into normal flow.
-   CopilotChat defaults to position:absolute for the input overlay. */
-.copilot-workspace-chat .copilot-chat-inline > div:last-child {
-  position: static !important;
-  flex-shrink: 0 !important;
 }
 
 /* Chat input styling */
@@ -253,7 +214,7 @@ input[type="time"] {
   resize: none !important;
 }
 
-/* A2-UI: consistent spacing for streamed primitive blocks */
+/* Consistent spacing for streamed primitive blocks */
 .copilot-workspace-chat .space-y-3 > * + * {
   margin-top: 0.75rem;
 }

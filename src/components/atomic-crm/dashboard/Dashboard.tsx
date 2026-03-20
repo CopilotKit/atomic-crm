@@ -91,9 +91,9 @@ export const Dashboard = () => {
           <Tabs
             value={rightTab}
             onValueChange={setRightTab}
-            className="flex flex-col"
+            className="flex flex-col h-[calc(100vh-8rem)]"
           >
-            <TabsList className="grid w-full grid-cols-2 mb-3">
+            <TabsList className="grid w-full grid-cols-2 mb-3 flex-shrink-0">
               <TabsTrigger value="tasks" className="text-xs">
                 <ClipboardList className="h-3.5 w-3.5 mr-1" />
                 Tasks
@@ -108,8 +108,8 @@ export const Dashboard = () => {
               <TasksList />
             </TabsContent>
 
-            <TabsContent value="copilot" className="mt-0 flex flex-col">
-              <div className="flex gap-1.5 flex-wrap mb-3">
+            <TabsContent value="copilot" className="mt-0 min-h-0 flex flex-col">
+              <div className="flex gap-1.5 flex-wrap mb-3 shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
@@ -125,7 +125,7 @@ export const Dashboard = () => {
                   Lead Triage
                 </Button>
               </div>
-              <CopilotWorkspace />
+              <CopilotWorkspace className="flex-1 min-h-0" />
             </TabsContent>
           </Tabs>
         </div>

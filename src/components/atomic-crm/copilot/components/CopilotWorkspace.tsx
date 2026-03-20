@@ -1,18 +1,14 @@
-import React from "react";
 import {
   CopilotChat,
   CopilotChatToolCallsView,
 } from "@copilotkit/react-core/v2";
 import { Bot, Loader2 } from "lucide-react";
-import { Card } from "@/components/ui/card";
+
+// ─── Null slot: disables a v2 CopilotChat sub-component ─────────────────────
+
+const NullSlot = () => null;
 
 // ─── v2 AssistantMessage ─────────────────────────────────────────────────────
-//
-// Renders:
-// 1. Tool call blocks via CopilotChatToolCallsView (generative UI)
-//    Tool execution status (spinner/checkmark) is handled by
-//    useDefaultRenderTool in useCopilotSetup — that's the reasoning trace.
-// 2. Agent text as plain chat text (no parsing, no status line splitting)
 
 function WorkspaceAssistantMessage({
   message,
@@ -48,7 +44,6 @@ function WorkspaceAssistantMessage({
 
   return (
     <div className="space-y-2 py-1">
-      {/* Tool call blocks (generative UI + useDefaultRenderTool status) */}
       {hasToolCalls && (
         <CopilotChatToolCallsView
           message={message as any}
@@ -56,7 +51,6 @@ function WorkspaceAssistantMessage({
         />
       )}
 
-      {/* Agent text — rendered as plain chat text, never parsed */}
       {textContent && (
         <div className="flex items-start gap-2">
           <Bot className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
@@ -91,22 +85,6 @@ function WorkspaceUserMessage({
   );
 }
 
-// ─── ScrollView slot: wraps messages in a Card ───────────────────────────────
-
-const CardScrollView = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ children, className, ...props }, ref) => (
-  <Card
-    ref={ref}
-    className={`mb-2 p-2 overflow-y-auto ${className ?? ""}`}
-    {...props}
-  >
-    {children}
-  </Card>
-));
-CardScrollView.displayName = "CardScrollView";
-
 // ─── CopilotWorkspace ────────────────────────────────────────────────────────
 
 interface CopilotWorkspaceProps {
@@ -116,13 +94,17 @@ interface CopilotWorkspaceProps {
 export function CopilotWorkspace({ className }: CopilotWorkspaceProps) {
   return (
     <div
-      className={`copilot-workspace-chat flex flex-col [&_[data-testid=copilot-welcome-screen]]:px-0 ${className ?? ""}`}
+      className={`copilot-workspace-chat h-full [&_[data-testid=copilot-welcome-screen]]:px-0 ${className ?? ""}`}
     >
       <CopilotChat
         className="copilot-chat-inline"
         messageView={{
           assistantMessage: WorkspaceAssistantMessage as any,
           userMessage: WorkspaceUserMessage as any,
+        }}
+        scrollView={{
+          feather: NullSlot,
+          scrollToBottomButton: NullSlot,
         }}
       />
     </div>
