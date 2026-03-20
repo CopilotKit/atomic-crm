@@ -7,20 +7,25 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useConfigurationLoader } from "../root/useConfigurationLoader";
 import Header from "./Header";
 import { DemoProvider } from "../demo/DemoProvider";
+import { PersonaProvider } from "../copilot/PersonaProvider";
 
 export const Layout = ({ children }: { children: ReactNode }) => {
   useConfigurationLoader();
   return (
-    <DemoProvider>
-      <Header />
-      <main className="max-w-screen-xl mx-auto pt-4 px-4" id="main-content">
-        <ErrorBoundary FallbackComponent={Error}>
-          <Suspense fallback={<Skeleton className="h-12 w-12 rounded-full" />}>
-            {children}
-          </Suspense>
-        </ErrorBoundary>
-      </main>
-      <Notification />
-    </DemoProvider>
+    <PersonaProvider>
+      <DemoProvider>
+        <Header />
+        <main className="max-w-screen-xl mx-auto pt-4 px-4" id="main-content">
+          <ErrorBoundary FallbackComponent={Error}>
+            <Suspense
+              fallback={<Skeleton className="h-12 w-12 rounded-full" />}
+            >
+              {children}
+            </Suspense>
+          </ErrorBoundary>
+        </main>
+        <Notification />
+      </DemoProvider>
+    </PersonaProvider>
   );
 };

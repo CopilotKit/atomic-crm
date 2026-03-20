@@ -4,6 +4,7 @@ import {
 } from "@copilotkit/react-core/v2";
 import { useGetIdentity } from "ra-core";
 import { useRegisterComponents } from "./useRegisterComponents";
+import { usePersona } from "./usePersona";
 import { useSearchContacts } from "../tools/useSearchContacts";
 import { useGetContactsByCompany } from "../tools/useGetContactsByCompany";
 import { useGetTopLeads } from "../tools/useGetTopLeads";
@@ -26,10 +27,17 @@ export function useCopilotSetup({ context }: CopilotSetupOptions) {
   const { data: identity } = useGetIdentity({ staleTime: 0 });
   const isAdmin = !!(identity as { administrator?: boolean })?.administrator;
 
-  // Share app state with agent, including role
+  // Detect persona from context (set via URL params or dropdown)
+  const { persona } = usePersona();
+
+  // Share app state with agent, including role and persona
   useAgentContext({
     description: context.description,
-    value: { ...context.value, userRole: isAdmin ? "admin" : "user" },
+    value: {
+      ...context.value,
+      userRole: isAdmin ? "admin" : "user",
+      ...(persona ? { persona } : {}),
+    },
   });
 
   // Register all UI components (primitives + composites)
