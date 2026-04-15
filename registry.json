@@ -674,6 +674,14 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/copilot/CopilotOverlayContext.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/CopilotButton.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/copilot/tools/useUpdateRenewalForecast.tsx",
           "type": "registry:component"
         },
@@ -727,6 +735,10 @@
         },
         {
           "path": "src/components/atomic-crm/copilot/components/CopilotWorkspace.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/CopilotOverlayPanel.tsx",
           "type": "registry:component"
         },
         {
