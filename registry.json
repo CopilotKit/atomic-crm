@@ -734,11 +734,19 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/copilot/components/ThreadHistory.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/copilot/components/CopilotWorkspace.tsx",
           "type": "registry:component"
         },
         {
           "path": "src/components/atomic-crm/copilot/components/CopilotOverlayPanel.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/copilot/components/CopilotHeader.tsx",
           "type": "registry:component"
         },
         {
