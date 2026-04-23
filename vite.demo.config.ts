@@ -39,6 +39,15 @@ export default defineConfig({
   build: {
     sourcemap: true,
   },
+  server: {
+    proxy: {
+      "/api/copilotkit": {
+        target: "http://localhost:4000",
+        changeOrigin: true,
+        ws: true,
+      },
+    },
+  },
   resolve: {
     preserveSymlinks: true,
     alias: {
