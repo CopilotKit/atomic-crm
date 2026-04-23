@@ -1,0 +1,31 @@
+{
+  "name": "@copilotkit/license-verifier",
+  "version": "0.0.1-a1",
+  "description": "CopilotKit license verification",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsdown && node scripts/obfuscate.js",
+    "test": "vitest run"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-kms": "^3.750.0",
+    "tsdown": "^0.9.0",
+    "vitest": "^4.0.0",
+    "javascript-obfuscator": "^4.0.0"
+  }
+}
