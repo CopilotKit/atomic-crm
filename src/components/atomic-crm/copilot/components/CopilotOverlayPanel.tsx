@@ -47,36 +47,35 @@ export function CopilotOverlayPanel() {
         </Button>
       </div>
 
-      {/* Action buttons */}
-      <div className="flex gap-1.5 flex-wrap px-4 py-2 flex-shrink-0">
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-xs h-7"
-          disabled={agent.isRunning}
-          onClick={() =>
-            triggerAgent("Search contacts in the CRM. Show results.")
-          }
-        >
-          <Users className="h-3 w-3 mr-1" />
-          Search Contacts
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-xs h-7"
-          disabled={agent.isRunning}
-          onClick={() =>
-            triggerAgent("Triage the top leads. Show the lead priority list.")
-          }
-        >
-          <Users className="h-3 w-3 mr-1" />
-          Lead Triage
-        </Button>
-      </div>
-
-      {/* Chat workspace */}
-      <CopilotWorkspace className="flex-1 min-h-0" />
+      {/* Chat workspace (includes thread header, action buttons, chat, and thread history) */}
+      <CopilotWorkspace className="flex-1 min-h-0">
+        <div className="flex gap-1.5 flex-wrap px-3 py-2 shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs h-7"
+            disabled={agent.isRunning}
+            onClick={() =>
+              triggerAgent("Search contacts in the CRM. Show results.")
+            }
+          >
+            <Users className="h-3 w-3 mr-1" />
+            Search Contacts
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs h-7"
+            disabled={agent.isRunning}
+            onClick={() =>
+              triggerAgent("Triage the top leads. Show the lead priority list.")
+            }
+          >
+            <Users className="h-3 w-3 mr-1" />
+            Lead Triage
+          </Button>
+        </div>
+      </CopilotWorkspace>
     </div>
   );
 }

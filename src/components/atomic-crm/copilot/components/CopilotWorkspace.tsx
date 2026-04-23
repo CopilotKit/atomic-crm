@@ -1,8 +1,12 @@
 import {
   CopilotChat,
   CopilotChatToolCallsView,
+  useAgent,
 } from "@copilotkit/react-core/v2";
 import { Loader2 } from "lucide-react";
+import { useState, useCallback, useRef } from "react";
+import { CopilotHeader } from "./CopilotHeader";
+import { ThreadHistory } from "./ThreadHistory";
 
 // ─── Null slot: disables a v2 CopilotChat sub-component ─────────────────────
 
@@ -87,26 +91,92 @@ function WorkspaceUserMessage({
 
 // ─── CopilotWorkspace ────────────────────────────────────────────────────────
 
+const AGENT_ID = "default";
+
 interface CopilotWorkspaceProps {
   className?: string;
+  children?: React.ReactNode;
 }
 
-export function CopilotWorkspace({ className }: CopilotWorkspaceProps) {
+export function CopilotWorkspace({
+  className,
+  children,
+}: CopilotWorkspaceProps) {
+  const { agent } = useAgent();
+  const [threadId, setThreadId] = useState<string | undefined>(undefined);
+  const [view, setView] = useState<"chat" | "history">("chat");
+  const [chatKey, setChatKey] = useState(0);
+  const agentThreadRef = useRef<string | undefined>(undefined);
+  if (agent.threadId) agentThreadRef.current = agent.threadId;
+
+  const handleToggleView = useCallback(() => {
+    setView((prev) => {
+      if (prev === "chat") {
+        // Only snapshot from agent if threadId isn't already set
+        // (i.e. CopilotChat was managing its own thread)
+        if (!threadId && agentThreadRef.current) {
+          setThreadId(agentThreadRef.current);
+        }
+        return "history";
+      }
+      setChatKey((k) => k + 1);
+      return "chat";
+    });
+  }, [threadId]);
+
+  const handleNewConversation = useCallback(() => {
+    console.log("[WS new conversation]");
+    setThreadId(undefined);
+    setChatKey((k) => k + 1);
+    setView("chat");
+  }, []);
+
+  const handleSelectThread = useCallback((id: string) => {
+    console.log("[WS select thread]", id);
+    setThreadId(id);
+    setChatKey((k) => k + 1);
+    setView("chat");
+  }, []);
+
   return (
     <div
-      className={`copilot-workspace-chat h-full [&_[data-testid=copilot-welcome-screen]]:px-0 ${className ?? ""}`}
+      className={`copilot-workspace-chat h-full flex flex-col [&_[data-testid=copilot-welcome-screen]]:px-0 ${className ?? ""}`}
     >
-      <CopilotChat
-        className="copilot-chat-inline"
-        messageView={{
-          assistantMessage: WorkspaceAssistantMessage as any,
-          userMessage: WorkspaceUserMessage as any,
-        }}
-        scrollView={{
-          feather: NullSlot,
-          scrollToBottomButton: NullSlot,
-        }}
+      <CopilotHeader
+        view={view}
+        onToggleView={handleToggleView}
+        onNewConversation={handleNewConversation}
       />
+
+      {view === "history" ? (
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <ThreadHistory
+            agentId={AGENT_ID}
+            activeThreadId={threadId ?? agent.threadId}
+            onSelectThread={handleSelectThread}
+          />
+        </div>
+      ) : (
+        <>
+          {children}
+          <div className="copilot-chat-area">
+            <CopilotChat
+              key={chatKey}
+              agentId={AGENT_ID}
+              threadId={threadId}
+              className="copilot-chat-inline"
+              messageView={{
+                assistantMessage: WorkspaceAssistantMessage as any,
+                userMessage: WorkspaceUserMessage as any,
+              }}
+              scrollView={{
+                feather: NullSlot,
+                scrollToBottomButton: NullSlot,
+              }}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
