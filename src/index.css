@@ -187,15 +187,24 @@ input[type="time"] {
    feather gradient & scroll-to-bottom button are disabled via slot props
    in CopilotWorkspace.tsx. */
 
-/* The wrapper establishes a positioning context so the chat can fill it
-   with absolute positioning — this guarantees a definite height for
-   StickToBottom's scroll container regardless of the h-full chain. */
+/* The wrapper is a flex column; the header sits on top and the chat area
+   below fills remaining space. The chat area is the positioning context
+   for the absolute .copilotKitChat — this guarantees a definite height
+   for StickToBottom's scroll container regardless of the h-full chain. */
 .copilot-workspace-chat {
-  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Fill wrapper and strip CopilotChat visual chrome */
-.copilot-workspace-chat .copilotKitChat {
+/* The chat area wrapper fills remaining space and acts as positioning context */
+.copilot-chat-area {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Fill chat area and strip CopilotChat visual chrome */
+.copilot-chat-area .copilotKitChat {
   position: absolute !important;
   inset: 0 !important;
   border: none !important;
@@ -205,7 +214,7 @@ input[type="time"] {
 }
 
 /* Chat input styling */
-.copilot-workspace-chat textarea {
+.copilot-chat-area textarea {
   border: 1px solid var(--border) !important;
   border-radius: var(--radius) !important;
   background: transparent !important;
@@ -215,6 +224,6 @@ input[type="time"] {
 }
 
 /* Consistent spacing for streamed primitive blocks */
-.copilot-workspace-chat .space-y-3 > * + * {
+.copilot-chat-area .space-y-3 > * + * {
   margin-top: 0.75rem;
 }
