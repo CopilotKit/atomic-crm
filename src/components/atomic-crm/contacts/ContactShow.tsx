@@ -340,61 +340,63 @@ const ContactShowContent = () => {
               value="copilot"
               className="mt-0 flex-1 min-h-0 flex flex-col"
               data-demo="copilot-panel"
+              forceMount
             >
               {/* Action buttons — pinned top, disabled while agent runs */}
-              <div className="flex gap-1.5 flex-wrap mb-3 flex-shrink-0">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs h-7"
-                  disabled={agent.isRunning}
-                  data-demo="review-btn"
-                  onClick={() =>
-                    triggerAgent(
-                      `Review the account for ${record.first_name} ${record.last_name} at ${companyName}. Show account summary, missing signals, risk indicators, and next actions.`,
-                    )
-                  }
-                >
-                  <Bot className="h-3 w-3 mr-1" />
-                  Review Account
-                </Button>
-                {companyName && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs h-7"
-                    disabled={agent.isRunning}
-                    data-demo="contract-btn"
-                    onClick={() =>
-                      triggerAgent(
-                        `Analyze the contract for ${companyName}. Show the contract risk report.`,
-                      )
-                    }
-                  >
-                    <FileSearch className="h-3 w-3 mr-1" />
-                    Analyze Contract
-                  </Button>
-                )}
-                {enriched?.renewal_amount != null && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs h-7"
-                    disabled={agent.isRunning}
-                    data-demo="forecast-btn"
-                    onClick={() =>
-                      triggerAgent(
-                        `Review the renewal forecast for ${record.first_name} ${record.last_name} and propose an adjustment if warranted.`,
-                      )
-                    }
-                  >
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    Forecast
-                  </Button>
-                )}
-              </div>
               {/* Copilot workspace — inside the aside */}
-              <CopilotWorkspace className="flex-1 min-h-0" />
+              <CopilotWorkspace className="flex-1 min-h-0">
+                <div className="flex gap-1.5 flex-wrap px-3 py-2 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7"
+                    disabled={agent.isRunning}
+                    data-demo="review-btn"
+                    onClick={() =>
+                      triggerAgent(
+                        `Review the account for ${record.first_name} ${record.last_name} at ${companyName}. Show account summary, missing signals, risk indicators, and next actions.`,
+                      )
+                    }
+                  >
+                    <Bot className="h-3 w-3 mr-1" />
+                    Review Account
+                  </Button>
+                  {companyName && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7"
+                      disabled={agent.isRunning}
+                      data-demo="contract-btn"
+                      onClick={() =>
+                        triggerAgent(
+                          `Analyze the contract for ${companyName}. Show the contract risk report.`,
+                        )
+                      }
+                    >
+                      <FileSearch className="h-3 w-3 mr-1" />
+                      Analyze Contract
+                    </Button>
+                  )}
+                  {enriched?.renewal_amount != null && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7"
+                      disabled={agent.isRunning}
+                      data-demo="forecast-btn"
+                      onClick={() =>
+                        triggerAgent(
+                          `Review the renewal forecast for ${record.first_name} ${record.last_name} and propose an adjustment if warranted.`,
+                        )
+                      }
+                    >
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      Forecast
+                    </Button>
+                  )}
+                </div>
+              </CopilotWorkspace>
             </TabsContent>
           </Tabs>
         </div>

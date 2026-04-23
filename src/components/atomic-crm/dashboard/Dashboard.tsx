@@ -115,24 +115,29 @@ export const Dashboard = () => {
               <TasksList />
             </TabsContent>
 
-            <TabsContent value="copilot" className="mt-0 min-h-0 flex flex-col">
-              <div className="flex gap-1.5 flex-wrap mb-3 shrink-0">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs h-7"
-                  disabled={agent.isRunning}
-                  onClick={() =>
-                    triggerAgent(
-                      `Triage the top leads. Show the lead priority list.`,
-                    )
-                  }
-                >
-                  <Users className="h-3 w-3 mr-1" />
-                  Lead Triage
-                </Button>
-              </div>
-              <CopilotWorkspace className="flex-1 min-h-0" />
+            <TabsContent
+              value="copilot"
+              className="mt-0 min-h-0 flex flex-col"
+              forceMount
+            >
+              <CopilotWorkspace className="flex-1 min-h-0">
+                <div className="flex gap-1.5 flex-wrap px-3 py-2 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7"
+                    disabled={agent.isRunning}
+                    onClick={() =>
+                      triggerAgent(
+                        `Triage the top leads. Show the lead priority list.`,
+                      )
+                    }
+                  >
+                    <Users className="h-3 w-3 mr-1" />
+                    Lead Triage
+                  </Button>
+                </div>
+              </CopilotWorkspace>
             </TabsContent>
           </Tabs>
         </div>

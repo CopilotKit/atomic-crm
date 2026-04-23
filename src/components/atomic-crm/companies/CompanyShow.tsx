@@ -243,25 +243,26 @@ const CompanyShowContent = () => {
             <TabsContent
               value="copilot"
               className="mt-0 flex-1 min-h-0 flex flex-col"
+              forceMount
             >
-              {/* Action buttons */}
-              <div className="flex gap-1.5 flex-wrap mb-3 flex-shrink-0">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs h-7"
-                  disabled={agent.isRunning}
-                  onClick={() =>
-                    triggerAgent(
-                      `Analyze the contract for ${record.name}. Show the contract risk report.`,
-                    )
-                  }
-                >
-                  <FileSearch className="h-3 w-3 mr-1" />
-                  Analyze Contract
-                </Button>
-              </div>
-              <CopilotWorkspace className="flex-1 min-h-0" />
+              <CopilotWorkspace className="flex-1 min-h-0">
+                <div className="flex gap-1.5 flex-wrap px-3 py-2 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7"
+                    disabled={agent.isRunning}
+                    onClick={() =>
+                      triggerAgent(
+                        `Analyze the contract for ${record.name}. Show the contract risk report.`,
+                      )
+                    }
+                  >
+                    <FileSearch className="h-3 w-3 mr-1" />
+                    Analyze Contract
+                  </Button>
+                </div>
+              </CopilotWorkspace>
             </TabsContent>
           </Tabs>
         </div>
