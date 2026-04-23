@@ -2,9 +2,9 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import {
   CopilotRuntime,
-  createCopilotEndpointSingleRoute,
+  CopilotKitIntelligence,
+  createCopilotEndpoint,
   BuiltInAgent,
-  InMemoryAgentRunner,
 } from "@copilotkit/runtime/v2";
 import crypto from "node:crypto";
 import path from "node:path";
@@ -24,6 +24,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Load CSV data
 loadContacts(path.join(__dirname, "../test-data/contacts_demo_v2.csv"));
+
+// CopilotKit Intelligence (optional — omit env vars to run without it)
+const intelligence = process.env.INTELLIGENCE_API_KEY
+  ? new CopilotKitIntelligence({
+      apiKey: process.env.INTELLIGENCE_API_KEY,
+      apiUrl: process.env.INTELLIGENCE_API_URL!,
+      wsUrl: process.env.INTELLIGENCE_GATEWAY_WS_URL!,
+    })
+  : undefined;
 
 // CopilotKit Runtime
 const MCP_SERVER_URL =
@@ -115,8 +124,11 @@ Rules for persona narration:
 });
 
 const runtime = new CopilotRuntime({
+  intelligence,
+  identifyUser: () => ({ id: "jordan-beamson", name: "Jordan Beamson" }),
+  // identifyUser: () => ({ id: process.env.INTELLIGENCE_USER_ID ?? "crm-user" }),
+  licenseToken: process.env.COPILOTKIT_LICENSE_TOKEN,
   agents: { default: builtInAgent },
-  runner: new InMemoryAgentRunner(),
   // MCP Apps middleware — contract analyzer available via MCP protocol.
   // Note: the frontend also registers an analyzeContract tool via useFrontendTool
   // which shadows the MCP tool and handles the multi-turn loop correctly.
@@ -157,8 +169,8 @@ function withCors(request: Request, response: Response): Response {
   return response;
 }
 
-// Mount CopilotKit endpoint (single-route: client POSTs everything to one URL)
-const copilotApp = createCopilotEndpointSingleRoute({
+// Mount CopilotKit endpoint
+const copilotApp = createCopilotEndpoint({
   runtime,
   basePath: "/api/copilotkit",
 });
@@ -257,9 +269,6 @@ app.get("/api/audit", (c) => {
   return c.json(filtered);
 });
 
-// Mount CopilotKit — must come after CORS middleware
-app.route("", copilotApp);
-
 const port = parseInt(process.env.PORT || "4000", 10);
 serve(
   {
@@ -268,6 +277,14 @@ serve(
       if (request.method === "OPTIONS") {
         return withCors(request, new Response(null, { status: 204 }));
       }
+
+      // Route CopilotKit requests directly to the endpoint handler
+      const { pathname } = new URL(request.url);
+      if (pathname.startsWith("/api/copilotkit")) {
+        const response = await copilotApp.fetch(request);
+        return withCors(request, response);
+      }
+
       const response = await app.fetch(request);
       return withCors(request, response);
     },

@@ -6,11 +6,13 @@
     "dev": "tsx watch --env-file=.env index.ts",
     "start": "tsx index.ts",
     "dev:mcp": "tsx watch mcp/contract-analyzer.ts",
-    "start:mcp": "tsx mcp/contract-analyzer.ts"
+    "start:mcp": "tsx mcp/contract-analyzer.ts",
+    "postinstall": "rm -rf node_modules/@copilotkit/runtime/node_modules/@copilotkit/license-verifier node_modules/@copilotkit/shared/node_modules/@copilotkit/license-verifier 2>/dev/null; true"
   },
   "dependencies": {
     "@ag-ui/mcp-apps-middleware": "latest",
-    "@copilotkit/runtime": "latest",
+    "@copilotkit/license-verifier": "file:../../Intelligence/packages/license-verifier",
+    "@copilotkit/runtime": "1.56.3",
     "@hono/node-server": "^1",
     "@modelcontextprotocol/ext-apps": "^1.2.2",
     "@modelcontextprotocol/sdk": "^1",
