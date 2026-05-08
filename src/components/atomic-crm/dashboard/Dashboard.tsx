@@ -18,7 +18,13 @@ import { TasksList } from "./TasksList";
 import { Welcome } from "./Welcome";
 
 export const Dashboard = () => {
-  const { agent } = useAgent();
+  // Own a stable threadId so triggerAgent and CopilotChat reference the
+  // same threaded agent clone (CopilotKit clones agents per-thread; without
+  // a shared threadId, agent.addMessage here goes to the BASE agent while
+  // CopilotChat renders messages from a different cloned agent and the
+  // panel never updates).
+  const [threadId, setThreadId] = useState<string>(() => randomUUID());
+  const { agent } = useAgent({ threadId });
   const { copilotkit } = useCopilotKit();
   const [rightTab, setRightTab] = useState("tasks");
 
@@ -43,6 +49,14 @@ export const Dashboard = () => {
     },
     [agent, copilotkit],
   );
+
+  const handleNewConversation = useCallback(() => {
+    setThreadId(randomUUID());
+  }, []);
+
+  const handleSelectThread = useCallback((id: string) => {
+    setThreadId(id);
+  }, []);
 
   const {
     data: dataContact,
@@ -120,7 +134,12 @@ export const Dashboard = () => {
               className="mt-0 min-h-0 flex flex-col"
               forceMount
             >
-              <CopilotWorkspace className="flex-1 min-h-0">
+              <CopilotWorkspace
+                className="flex-1 min-h-0"
+                threadId={threadId}
+                onNewConversation={handleNewConversation}
+                onSelectThread={handleSelectThread}
+              >
                 <div className="flex gap-1.5 flex-wrap px-3 py-2 shrink-0">
                   <Button
                     variant="outline"

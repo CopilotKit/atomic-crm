@@ -17,6 +17,11 @@ export function useGetContactsByCompany() {
       const res = await fetch(
         `${API_BASE}/api/companies/${encodeURIComponent(params.companyName)}/contacts`,
       );
+      if (!res.ok) {
+        throw new Error(
+          `getContactsByCompany HTTP ${res.status} ${res.statusText}`,
+        );
+      }
       return res.json();
     },
   });

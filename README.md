@@ -59,6 +59,37 @@ If you need debug the backend, you can access the following services:
 - Attachments storage: [http://localhost:54323/project/default/storage/buckets/attachments](http://localhost:54323/project/default/storage/buckets/attachments)
 - Inbucket email testing service: [http://localhost:54324/](http://localhost:54324/)
 
+## CopilotKit assistant
+
+The in-app CopilotKit assistant is split across three services (see `render.yaml`):
+
+- `atomic-crm-app` — the static frontend (this repo)
+- `atomic-crm-copilot` — the CopilotKit runtime (Hono server in `server/`)
+- `atomic-crm-mcp` — the MCP contract analyzer (also in `server/mcp/`)
+
+Two env vars wire the frontend to the runtime:
+
+- `VITE_COPILOTKIT_RUNTIME_URL` — base URL for the CopilotKit chat endpoint (e.g. `https://atomic-crm-copilot.onrender.com/api/copilotkit`). Read at build time.
+- `VITE_COPILOTKIT_API_URL` — base URL for the runtime's REST endpoints used by frontend tools (`/api/contacts`, `/api/leads/top`, etc.). Read at build time.
+
+### Local dev workflows
+
+Run the **full local stack** (frontend + copilot runtime + MCP) — needs an LLM provider configured in `server/.env`:
+
+```sh
+npm run dev:all
+```
+
+Or run **only the frontend against the deployed CopilotKit backend** (no local server needed):
+
+```sh
+VITE_COPILOTKIT_API_URL=http://localhost:5173 \
+COPILOTKIT_PROXY_TARGET=https://atomic-crm-copilot.onrender.com \
+  npm run dev:demo
+```
+
+The vite dev server proxies `/api/*` to `COPILOTKIT_PROXY_TARGET` so tool calls and chat both flow through the same origin (no CORS).
+
 ## Documentation
 
 The user and developer documentation for this project is available [in the `doc/` directory](./doc/). You can also read it online at [https://marmelab.com/atomic-crm/doc/](https://marmelab.com/atomic-crm/doc/).

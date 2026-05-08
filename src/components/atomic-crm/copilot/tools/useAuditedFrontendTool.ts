@@ -13,9 +13,22 @@ export function useAuditedFrontendTool(
     ...options,
     handler: originalHandler
       ? async (args: any, context: any) => {
-          const result = await originalHandler(args, context);
-          logToolCall(options.name, args);
-          return result;
+          try {
+            const result = await originalHandler(args, context);
+            logToolCall(options.name, args);
+            return result;
+          } catch (err) {
+            // Returning a structured error keeps the result in the agent's
+            // tool-output channel. Re-throwing here causes CopilotKit's
+            // RunHandler to abort the run, which triggers a new thread on
+            // the next chat send and visibly wipes the panel.
+            const message = err instanceof Error ? err.message : String(err);
+            console.error("[tool:error]", options.name, err);
+            return {
+              error: `Tool ${options.name} failed: ${message}`,
+              ok: false,
+            };
+          }
         }
       : undefined,
   };

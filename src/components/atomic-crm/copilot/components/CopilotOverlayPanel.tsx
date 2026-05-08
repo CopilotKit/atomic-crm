@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAgent, useCopilotKit } from "@copilotkit/react-core/v2";
 import { randomUUID } from "@copilotkit/shared";
 import { Users, X } from "lucide-react";
@@ -9,7 +9,14 @@ import { CopilotWorkspace } from "./CopilotWorkspace";
 
 export function CopilotOverlayPanel() {
   const { close } = useCopilotOverlay();
-  const { agent } = useAgent();
+  // Own the threadId here so the quick-action buttons and <CopilotChat>
+  // operate on the same agent clone. CopilotKit clones agents per-thread
+  // (getOrCreateThreadClone in react-core/v2); without a shared threadId,
+  // useAgent() outside CopilotChat returns the BASE agent while CopilotChat
+  // renders messages from a different cloned agent — meaning addMessage +
+  // runAgent here would never appear in the chat panel.
+  const [threadId, setThreadId] = useState<string>(() => randomUUID());
+  const { agent } = useAgent({ threadId });
   const { copilotkit } = useCopilotKit();
 
   useCopilotSetup({
@@ -26,6 +33,14 @@ export function CopilotOverlayPanel() {
     },
     [agent, copilotkit],
   );
+
+  const handleNewConversation = useCallback(() => {
+    setThreadId(randomUUID());
+  }, []);
+
+  const handleSelectThread = useCallback((id: string) => {
+    setThreadId(id);
+  }, []);
 
   // Escape key closes the panel
   useEffect(() => {
@@ -48,7 +63,12 @@ export function CopilotOverlayPanel() {
       </div>
 
       {/* Chat workspace (includes thread header, action buttons, chat, and thread history) */}
-      <CopilotWorkspace className="flex-1 min-h-0">
+      <CopilotWorkspace
+        className="flex-1 min-h-0"
+        threadId={threadId}
+        onNewConversation={handleNewConversation}
+        onSelectThread={handleSelectThread}
+      >
         <div className="flex gap-1.5 flex-wrap px-3 py-2 shrink-0">
           <Button
             variant="outline"
