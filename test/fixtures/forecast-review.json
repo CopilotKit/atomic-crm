@@ -1,0 +1,15 @@
+{
+  "fixtures": [
+    {
+      "match": { "userMessage": "Review the renewal forecast" },
+      "response": {
+        "toolCalls": [
+          {
+            "name": "updateRenewalForecast",
+            "arguments": "{\"contactId\":45,\"contactName\":\"Fannie Pfeffer\",\"currentCategory\":\"Best Case\",\"proposedCategory\":\"Most Likely\",\"currentProbability\":65,\"proposedProbability\":50,\"reason\":\"Economic buyer not identified and budget not confirmed. Legal review not started.\"}"
+          }
+        ]
+      }
+    }
+  ]
+}

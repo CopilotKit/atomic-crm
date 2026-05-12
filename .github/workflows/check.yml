@@ -1,0 +1,95 @@
+name: ✅ Check
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        types:
+            - opened
+            - reopened
+            - synchronize
+            - ready_for_review
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: write
+    checks: write
+
+jobs:
+    lint:
+        name: 🔬 ESLint
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        if: ${{ !github.event.pull_request.draft || github.event_name == 'push' }}
+        steps:
+            - name: 📥 Checkout repo
+              uses: actions/checkout@v4
+
+            - name: ⚙️ Setup node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: npm
+
+            - name: 📥 Download deps
+              run: npm ci
+
+            - name: 🔬 Lint
+              uses: wearerequired/lint-action@v2
+              with:
+                  eslint: true
+                  eslint_args: "**/*.{mjs,ts,tsx}"
+                  prettier: true
+                  prettier_args: "--config ./.prettierrc.json \"**/*.{js,json,ts,tsx,css,md,html}\""
+
+    test:
+        name: 🔎 Test
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        if: ${{ !github.event.pull_request.draft || github.event_name == 'push' }}
+        steps:
+            - name: 📥 Checkout repo
+              uses: actions/checkout@v4
+
+            - name: ⚙️ Setup node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: npm
+
+            - name: 📥 Download deps
+              run: npm ci
+
+            - name: 🎭 Install Playwright browsers
+              run: npx playwright install chromium chromium-headless-shell
+
+            - name: 🔎 Unit Tests
+              run: CI=1 npm test -- --run
+
+            - name: 🔎 Integration Tests
+              run: CI=1 npm run test:integration -- --run
+
+
+    build:
+        name: 🔨 Build
+        timeout-minutes: 10
+        runs-on: ubuntu-latest
+        if: ${{ !github.event.pull_request.draft || github.event_name == 'push' }}
+        steps:
+            - name: 📥 Checkout repo
+              uses: actions/checkout@v4
+
+            - name: ⚙️ Setup node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: npm
+
+            - name: 📥 Download deps
+              run: npm ci
+
+            - name: 🔨 Build
+              run: npm run build
