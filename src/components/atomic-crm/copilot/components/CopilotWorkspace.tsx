@@ -1,10 +1,9 @@
 import {
   CopilotChat,
   CopilotChatToolCallsView,
-  useAgent,
 } from "@copilotkit/react-core/v2";
 import { Loader2 } from "lucide-react";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import { CopilotHeader } from "./CopilotHeader";
 import { ThreadHistory } from "./ThreadHistory";
 
@@ -96,47 +95,43 @@ const AGENT_ID = "default";
 interface CopilotWorkspaceProps {
   className?: string;
   children?: React.ReactNode;
+  threadId: string;
+  onNewConversation: () => void;
+  onSelectThread: (id: string) => void;
 }
 
 export function CopilotWorkspace({
   className,
   children,
+  threadId,
+  onNewConversation,
+  onSelectThread,
 }: CopilotWorkspaceProps) {
-  const { agent } = useAgent();
-  const [threadId, setThreadId] = useState<string | undefined>(undefined);
   const [view, setView] = useState<"chat" | "history">("chat");
   const [chatKey, setChatKey] = useState(0);
-  const agentThreadRef = useRef<string | undefined>(undefined);
-  if (agent.threadId) agentThreadRef.current = agent.threadId;
 
   const handleToggleView = useCallback(() => {
     setView((prev) => {
-      if (prev === "chat") {
-        // Only snapshot from agent if threadId isn't already set
-        // (i.e. CopilotChat was managing its own thread)
-        if (!threadId && agentThreadRef.current) {
-          setThreadId(agentThreadRef.current);
-        }
-        return "history";
-      }
+      if (prev === "chat") return "history";
       setChatKey((k) => k + 1);
       return "chat";
     });
-  }, [threadId]);
+  }, []);
 
   const handleNewConversation = useCallback(() => {
-    console.log("[WS new conversation]");
-    setThreadId(undefined);
+    onNewConversation();
     setChatKey((k) => k + 1);
     setView("chat");
-  }, []);
+  }, [onNewConversation]);
 
-  const handleSelectThread = useCallback((id: string) => {
-    console.log("[WS select thread]", id);
-    setThreadId(id);
-    setChatKey((k) => k + 1);
-    setView("chat");
-  }, []);
+  const handleSelectThread = useCallback(
+    (id: string) => {
+      onSelectThread(id);
+      setChatKey((k) => k + 1);
+      setView("chat");
+    },
+    [onSelectThread],
+  );
 
   return (
     <div
@@ -152,7 +147,7 @@ export function CopilotWorkspace({
         <div className="flex-1 min-h-0 overflow-y-auto">
           <ThreadHistory
             agentId={AGENT_ID}
-            activeThreadId={threadId ?? agent.threadId}
+            activeThreadId={threadId}
             onSelectThread={handleSelectThread}
           />
         </div>

@@ -30,7 +30,14 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               </Suspense>
             </ErrorBoundary>
           </main>
-          <CopilotOverlayPanelGate />
+          <ErrorBoundary
+            FallbackComponent={CopilotErrorFallback}
+            onError={(error, info) =>
+              console.error("[copilot:error-boundary]", error, info)
+            }
+          >
+            <CopilotOverlayPanelGate />
+          </ErrorBoundary>
           <Notification />
         </CopilotOverlayProvider>
       </DemoProvider>
@@ -42,4 +49,28 @@ function CopilotOverlayPanelGate() {
   const { isOpen } = useCopilotOverlay();
   if (!isOpen) return null;
   return <CopilotOverlayPanel />;
+}
+
+function CopilotErrorFallback({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error;
+  resetErrorBoundary: () => void;
+}) {
+  return (
+    <div className="fixed right-4 top-14 z-50 w-92 max-w-[calc(100vw-2rem)] rounded-md border bg-background p-4 shadow-lg">
+      <p className="text-sm font-medium">Copilot crashed</p>
+      <p className="mt-1 text-xs text-muted-foreground break-words">
+        {error.message}
+      </p>
+      <button
+        type="button"
+        onClick={resetErrorBoundary}
+        className="mt-3 rounded-md border px-3 py-1 text-xs hover:bg-accent"
+      >
+        Reset
+      </button>
+    </div>
+  );
 }

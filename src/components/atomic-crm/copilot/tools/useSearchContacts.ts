@@ -8,8 +8,16 @@ export function useSearchContacts() {
   useFrontendTool({
     name: "searchContacts",
     description:
-      "Search enriched contacts by filters. Returns matching contacts with lead scores, lifecycle stages, renewal data, etc.",
+      "Find contacts by name and/or filter by company, lifecycle stage, lead score, or status. Use this FIRST whenever you need a contact's id (e.g. before createTask). When the user mentions a person by name, pass firstName and lastName.",
     parameters: z.object({
+      firstName: z
+        .string()
+        .optional()
+        .describe("Contact first name (use together with lastName)"),
+      lastName: z
+        .string()
+        .optional()
+        .describe("Contact last name (use together with firstName)"),
       company: z.string().optional().describe("Filter by company name"),
       lifecycleStage: z
         .string()
@@ -24,6 +32,8 @@ export function useSearchContacts() {
     }),
     handler: async (params) => {
       const searchParams = new URLSearchParams();
+      if (params.firstName) searchParams.set("first_name", params.firstName);
+      if (params.lastName) searchParams.set("last_name", params.lastName);
       if (params.company) searchParams.set("company", params.company);
       if (params.lifecycleStage)
         searchParams.set("lifecycle_stage", params.lifecycleStage);
@@ -33,6 +43,9 @@ export function useSearchContacts() {
         searchParams.set("lead_score_max", String(params.leadScoreMax));
       if (params.status) searchParams.set("status", params.status);
       const res = await fetch(`${API_BASE}/api/contacts?${searchParams}`);
+      if (!res.ok) {
+        throw new Error(`searchContacts HTTP ${res.status} ${res.statusText}`);
+      }
       return res.json();
     },
   });

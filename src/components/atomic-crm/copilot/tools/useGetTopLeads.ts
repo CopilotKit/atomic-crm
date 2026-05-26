@@ -19,7 +19,25 @@ export function useGetTopLeads() {
     handler: async (params) => {
       const limit = params.limit ?? 10;
       const res = await fetch(`${API_BASE}/api/leads/top?limit=${limit}`);
-      return res.json();
+      if (!res.ok) {
+        throw new Error(`getTopLeads HTTP ${res.status} ${res.statusText}`);
+      }
+      const rows: Array<Record<string, unknown>> = await res.json();
+      // Pre-shape for LeadPriorityList so the agent doesn't have to re-map
+      // snake_case API fields to the component's expected camelCase props.
+      return rows.map((c) => ({
+        contactId: c.id,
+        name: `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim(),
+        score: c.lead_score,
+        lifecycleStage: c.lifecycle_stage,
+        lastActivity:
+          c.last_activity_type && c.last_activity_date
+            ? `${c.last_activity_type} on ${c.last_activity_date}`
+            : (c.last_activity_type ?? c.last_activity_date ?? ""),
+        company: c.company_name,
+        status: c.status,
+        title: c.title,
+      }));
     },
   });
 }

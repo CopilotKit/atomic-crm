@@ -41,8 +41,12 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api/copilotkit": {
-        target: "http://localhost:4000",
+      // Forward ALL /api/* paths so tools that hit /api/leads, /api/contacts,
+      // /api/audit, etc. work too (not just /api/copilotkit). Set
+      // COPILOTKIT_PROXY_TARGET to the deployed runtime URL to dev against
+      // prod without running the local copilot server.
+      "/api": {
+        target: process.env.COPILOTKIT_PROXY_TARGET || "http://localhost:4000",
         changeOrigin: true,
         ws: true,
       },
