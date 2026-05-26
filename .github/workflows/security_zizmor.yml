@@ -7,13 +7,11 @@ on:
       - ".github/workflows/**"
       - ".github/actions/**"
       - ".github/zizmor.yml"
-      - ".github/dependabot.yml"
   pull_request:
     paths:
       - ".github/workflows/**"
       - ".github/actions/**"
       - ".github/zizmor.yml"
-      - ".github/dependabot.yml"
   schedule:
     - cron: "0 9 * * 1"
   workflow_dispatch:
