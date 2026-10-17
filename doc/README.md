@@ -1,3 +1,5 @@
+[English](README.md) · [Español](README.es-ES.md) · [Français](README.fr-FR.md)
+
 # Atomic CRM Documentation
 
 This directory contains the Astro/Starlight documentation site for Atomic CRM. The published documentation covers end-user workflows, providers, authentication, deployment, customization, the API, inbound email, and the MCP server.

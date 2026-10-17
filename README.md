@@ -1,3 +1,5 @@
+[English](README.md) · [Español](README.es-ES.md) · [Français](README.fr-FR.md)
+
 # Atomic CRM
 
 A full-featured CRM built with React, Vite+, shadcn-admin-kit/Base UI, and a Cloudflare-native backend.
