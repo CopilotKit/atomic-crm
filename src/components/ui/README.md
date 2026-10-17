@@ -1,3 +1,5 @@
+[English](README.md) · [Español](README.es-ES.md) · [Français](README.fr-FR.md)
+
 # UI Components
 
 The components in this directory come from [shadcn/ui](https://ui.shadcn.com/). They are low-level building blocks for creating user interfaces, including:
@@ -6,8 +8,8 @@ The components in this directory come from [shadcn/ui](https://ui.shadcn.com/). 
 - Buttons
 - Cards
 - Dialogs
-- Forms Inputs
-- Navigation MMenus
+- Form Inputs
+- Navigation Menus
 - Tables
 - Tabs
 - Tooltips

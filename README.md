@@ -1,3 +1,5 @@
+[English](README.md) · [Español](README.es-ES.md) · [Français](README.fr-FR.md)
+
 # Atomic CRM
 
 A full-featured CRM built with React, shadcn-admin-kit, and Supabase.
@@ -102,7 +104,7 @@ This project contains unit tests. Run them with the following command:
 make test
 ```
 
-You can add your own unit tests powered by Jest anywhere in the `src` directory. The test files should be named `*.test.tsx` or `*.test.ts`.
+You can add your own unit tests powered by Vitest anywhere in the `src` directory. The test files should be named `*.test.tsx` or `*.test.ts`.
 
 ## Registry
 

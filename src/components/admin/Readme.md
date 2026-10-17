@@ -1,6 +1,8 @@
+[English](Readme.md) · [Español](Readme.es-ES.md) · [Français](Readme.fr-FR.md)
+
 # Admin Components
 
-The components in this directory come from [Shadcn Admin Kit](https://marmelab.com/shadcn-admin-kit/). They are application building blocks providing solution to usual single-page apps needs, including:
+The components in this directory come from [Shadcn Admin Kit](https://marmelab.com/shadcn-admin-kit/). They are application building blocks providing solutions to common single-page app needs, including:
 
 - data fetching,
 - lists and data tables,
@@ -11,7 +13,7 @@ The components in this directory come from [Shadcn Admin Kit](https://marmelab.c
 - theming,
 - loading and error management.
 - rapid CRUD generation,
-- ralationship management,
+- relationship management,
 - roles & permissions,
 - optimistic UI,
 - undo functionality,
