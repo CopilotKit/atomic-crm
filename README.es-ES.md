@@ -79,7 +79,7 @@ Dos variables de entorno conectan el frontend con el runtime:
 Inicia toda la pila local (frontend, runtime de Copilot y MCP); necesitas configurar un proveedor de LLM en `server/.env`:
 
 ```sh
-npm run dev:all
+pnpm run dev:all
 ```
 
 O ejecuta solo el frontend contra el backend de CopilotKit ya desplegado (no hace falta iniciar un servidor local):
@@ -87,7 +87,7 @@ O ejecuta solo el frontend contra el backend de CopilotKit ya desplegado (no hac
 ```sh
 VITE_COPILOTKIT_API_URL=http://localhost:5173 \
 COPILOTKIT_PROXY_TARGET=https://atomic-crm-copilot.onrender.com \
-  npm run dev:demo
+  pnpm run dev:demo
 ```
 
 El servidor de desarrollo de Vite redirige `/api/*` a `COPILOTKIT_PROXY_TARGET`, de modo que las llamadas a las herramientas y el chat usan el mismo origen y no necesitan CORS.

@@ -79,7 +79,7 @@ Two env vars wire the frontend to the runtime:
 Run the **full local stack** (frontend + copilot runtime + MCP) — needs an LLM provider configured in `server/.env`:
 
 ```sh
-npm run dev:all
+pnpm run dev:all
 ```
 
 Or run **only the frontend against the deployed CopilotKit backend** (no local server needed):
@@ -87,7 +87,7 @@ Or run **only the frontend against the deployed CopilotKit backend** (no local s
 ```sh
 VITE_COPILOTKIT_API_URL=http://localhost:5173 \
 COPILOTKIT_PROXY_TARGET=https://atomic-crm-copilot.onrender.com \
-  npm run dev:demo
+  pnpm run dev:demo
 ```
 
 The vite dev server proxies `/api/*` to `COPILOTKIT_PROXY_TARGET` so tool calls and chat both flow through the same origin (no CORS).
