@@ -30,3 +30,51 @@ updates:
     open-pull-requests-limit: 10
     cooldown:
       default-days: 1
+
+  # pnpm is managed by Dependabot's npm ecosystem; the root lockfile covers
+  # the root package and all pnpm workspace packages.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    groups:
+      production-minor-and-patch:
+        applies-to: version-updates
+        dependency-type: production
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      development-minor-and-patch:
+        applies-to: version-updates
+        dependency-type: development
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Keep majors visible while avoiding one PR for every package.
+      major-production:
+        applies-to: version-updates
+        dependency-type: production
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+      major-development:
+        applies-to: version-updates
+        dependency-type: development
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+    labels:
+      - "dependencies"
+      - "npm"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 1
