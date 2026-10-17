@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "engines": {
-    "node": ">=22.13.0"
+    "node": ">=22.18.0"
   },
   "scripts": {
     "dev": "tsx watch --env-file=.env index.ts",
@@ -12,7 +12,7 @@
     "start:mcp": "tsx mcp/contract-analyzer.ts"
   },
   "dependencies": {
-    "@copilotkit/runtime": "1.77.2",
+    "@copilotkit/runtime": "1.79.1",
     "@hono/node-server": "^2.1.4",
     "@modelcontextprotocol/ext-apps": "^2.0.3",
     "@modelcontextprotocol/sdk": "^1.32.1",
